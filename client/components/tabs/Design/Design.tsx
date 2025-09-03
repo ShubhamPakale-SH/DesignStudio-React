@@ -51,7 +51,7 @@ const Design = () => {
             <p className="text-sm text-neutral-700">Folder content</p>
           </TabsContent>
           <TabsContent value="compile" className="pt-4">
-            <p className="text-sm text-neutral-700">Design Compile content</p>
+            <p className="text-sm text-neutral-700">Document Design List</p>
           </TabsContent>
           <TabsContent value="sync" className="pt-4">
             <p className="text-sm text-neutral-700">Design Sync content</p>
