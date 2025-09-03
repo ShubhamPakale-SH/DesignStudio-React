@@ -18,10 +18,7 @@ const DocumentsTab = () => {
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="anchor">Anchor</SelectItem>
-            <SelectItem value="masterlist">MasterList</SelectItem>
-            <SelectItem value="collateral">Collateral</SelectItem>
-            <SelectItem value="view">View</SelectItem>
+           
           </SelectContent>
         </Select>
       </div>
