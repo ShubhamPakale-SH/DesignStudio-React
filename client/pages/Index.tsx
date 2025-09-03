@@ -1,13 +1,16 @@
+import { useState } from "react";
 import Header from "@/components/main_components/Header";
 import Sidebar from "@/components/main_components/Sidebar";
 import Footer from "@/components/main_components/Footer";
 
 export default function Index() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <Header />
+      <Header sidebarOpen={sidebarOpen} />
       <div className="flex flex-1 min-h-0">
-        <Sidebar />
+        <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
         <main className="flex-1 flex items-center justify-center shadow-[1px_1px_3px_0_rgba(0,0,0,1)]">
           <h1 className="text-[30px] leading-9 font-semibold tracking-[-0.75px]">Main Index Page</h1>
         </main>
