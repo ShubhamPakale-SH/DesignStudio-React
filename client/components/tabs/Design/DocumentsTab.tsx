@@ -19,15 +19,13 @@ const DocumentsTab = () => {
           Document Design Type:
         </label>
         <div className="w-56">
-          <Select defaultValue="anchor">
+          <Select defaultValue="select">
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="anchor">Anchor</SelectItem>
-              <SelectItem value="masterlist">MasterList</SelectItem>
-              <SelectItem value="collateral">Collateral</SelectItem>
-              <SelectItem value="view">View</SelectItem>
+              <SelectItem value="select">--Select--</SelectItem>
+             
             </SelectContent>
           </Select>
         </div>
