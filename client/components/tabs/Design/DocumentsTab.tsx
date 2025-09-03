@@ -7,7 +7,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DesignList from "@/components/Reusable Components/DesignList";
-import FormVersionTable, { FormVersionRow } from "@/components/Reusable Components/FormVersionTable";
+import FormVersionTable, {
+  FormVersionRow,
+} from "@/components/Reusable Components/FormVersionTable";
 
 const DocumentsTab = () => {
   const [selected, setSelected] = useState<string | null>(null); // Tracks the selected item
@@ -56,11 +58,28 @@ const DocumentsTab = () => {
           {selected && selected !== "select" && (
             <div className="md:w-2/3 w-full">
               <FormVersionTable
-                rows={([
-                  { environment: "Development", effectiveDate: "2025-01-12", version: "1.0.0", status: "Active" },
-                  { environment: "QA", effectiveDate: "2025-02-03", version: "1.1.0", status: "Draft" },
-                  { environment: "Production", effectiveDate: "2025-03-15", version: "2.0.0", status: "Active" },
-                ]) as FormVersionRow[]}
+                rows={
+                  [
+                    {
+                      environment: "Development",
+                      effectiveDate: "2025-01-12",
+                      version: "1.0.0",
+                      status: "Active",
+                    },
+                    {
+                      environment: "QA",
+                      effectiveDate: "2025-02-03",
+                      version: "1.1.0",
+                      status: "Draft",
+                    },
+                    {
+                      environment: "Production",
+                      effectiveDate: "2025-03-15",
+                      version: "2.0.0",
+                      status: "Active",
+                    },
+                  ] as FormVersionRow[]
+                }
               />
             </div>
           )}

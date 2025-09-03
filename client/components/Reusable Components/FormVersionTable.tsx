@@ -23,13 +23,22 @@ const StatusBadge = ({ status }: { status: string }) => {
           ? "bg-rose-100 text-rose-700 border-rose-200"
           : "bg-slate-100 text-slate-700 border-slate-200";
   return (
-    <span className={cn("inline-flex items-center rounded px-2 py-0.5 text-xs border", color)}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded px-2 py-0.5 text-xs border",
+        color,
+      )}
+    >
       {status}
     </span>
   );
 };
 
-const FormVersionTable = ({ rows, className, onAction }: FormVersionTableProps) => {
+const FormVersionTable = ({
+  rows,
+  className,
+  onAction,
+}: FormVersionTableProps) => {
   return (
     <div
       className={cn(
@@ -42,20 +51,35 @@ const FormVersionTable = ({ rows, className, onAction }: FormVersionTableProps) 
       <table className="w-full table-auto border-collapse">
         <thead>
           <tr className="bg-muted/60">
-            <th className="text-left px-4 py-2 text-sm font-semibold">Environment name</th>
-            <th className="text-left px-4 py-2 text-sm font-semibold">Effective Date</th>
-            <th className="text-left px-4 py-2 text-sm font-semibold">Version</th>
-            <th className="text-left px-4 py-2 text-sm font-semibold">Status</th>
-            <th className="text-left px-4 py-2 text-sm font-semibold">Action</th>
+            <th className="text-left px-4 py-2 text-sm font-semibold">
+              Environment name
+            </th>
+            <th className="text-left px-4 py-2 text-sm font-semibold">
+              Effective Date
+            </th>
+            <th className="text-left px-4 py-2 text-sm font-semibold">
+              Version
+            </th>
+            <th className="text-left px-4 py-2 text-sm font-semibold">
+              Status
+            </th>
+            <th className="text-left px-4 py-2 text-sm font-semibold">
+              Action
+            </th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={`${row.environment}-${row.version}`} className="border-t border-border/60">
+            <tr
+              key={`${row.environment}-${row.version}`}
+              className="border-t border-border/60"
+            >
               <td className="px-4 py-2 text-sm">{row.environment}</td>
               <td className="px-4 py-2 text-sm">{row.effectiveDate}</td>
               <td className="px-4 py-2 text-sm">{row.version}</td>
-              <td className="px-4 py-2 text-sm"><StatusBadge status={row.status} /></td>
+              <td className="px-4 py-2 text-sm">
+                <StatusBadge status={row.status} />
+              </td>
               <td className="px-4 py-2 text-sm">
                 <button
                   type="button"

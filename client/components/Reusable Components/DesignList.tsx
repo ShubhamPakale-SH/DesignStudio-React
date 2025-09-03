@@ -7,7 +7,12 @@ export interface DesignListProps {
   onSelect?: (name: string) => void;
 }
 
-const DesignList = ({ designs, className, selected, onSelect }: DesignListProps) => {
+const DesignList = ({
+  designs,
+  className,
+  selected,
+  onSelect,
+}: DesignListProps) => {
   return (
     <div
       className={cn(
@@ -20,7 +25,12 @@ const DesignList = ({ designs, className, selected, onSelect }: DesignListProps)
       <table className="w-full table-fixed border-collapse">
         <thead>
           <tr className="bg-muted/60">
-            <th scope="col" className="text-left px-4 py-2 text-sm font-semibold">Design Name</th>
+            <th
+              scope="col"
+              className="text-left px-4 py-2 text-sm font-semibold"
+            >
+              Design Name
+            </th>
           </tr>
         </thead>
         <tbody>
