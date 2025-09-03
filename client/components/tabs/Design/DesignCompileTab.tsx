@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// 1. Expanded mock data for the new columns
 const documentDesigns = [
   {
     id: "D001",
@@ -62,26 +61,61 @@ const documentDesigns = [
 ];
 
 const DesignCompileTab = () => {
-  // 2. State management for checkboxes
   const [selectedDesigns, setSelectedDesigns] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  
+  // 1. State for filters and the data that will be displayed
+  const [filters, setFilters] = useState({
+    designName: "",
+    designType: "",
+    version: "",
+    effectiveDate: "",
+    status: "",
+    compiledBy: "",
+    lastCompiledDate: "",
+    compiledStatus: "",
+  });
+  const [filteredDesigns, setFilteredDesigns] = useState(documentDesigns);
 
-  // Effect to sync the 'Select All' checkbox
+  // 2. Logic to apply filters whenever they change
   useEffect(() => {
-    setSelectAll(selectedDesigns.length === documentDesigns.length && documentDesigns.length > 0);
-  }, [selectedDesigns]);
+    let data = [...documentDesigns];
+    
+    // Apply each filter from the state
+    data = data.filter(d =>
+      d.designName.toLowerCase().includes(filters.designName.toLowerCase()) &&
+      d.designType.toLowerCase().includes(filters.designType.toLowerCase()) &&
+      d.version.toLowerCase().includes(filters.version.toLowerCase()) &&
+      d.effectiveDate.toLowerCase().includes(filters.effectiveDate.toLowerCase()) &&
+      d.status.toLowerCase().includes(filters.status.toLowerCase()) &&
+      d.compiledBy.toLowerCase().includes(filters.compiledBy.toLowerCase()) &&
+      d.lastCompiledDate.toLowerCase().includes(filters.lastCompiledDate.toLowerCase()) &&
+      d.compiledStatus.toLowerCase().includes(filters.compiledStatus.toLowerCase())
+    );
+    
+    setFilteredDesigns(data);
+  }, [filters]);
+  
+  // Handler to update a specific filter's value
+  const handleFilterChange = (column: keyof typeof filters, value: string) => {
+    setFilters(prev => ({ ...prev, [column]: value }));
+  };
 
-  // Handler for the master checkbox
+  // Effect to sync the 'Select All' checkbox with filtered data
+  useEffect(() => {
+    setSelectAll(filteredDesigns.length > 0 && selectedDesigns.length === filteredDesigns.length);
+  }, [selectedDesigns, filteredDesigns]);
+
+  // Updated handler to select all *visible* (filtered) rows
   const handleSelectAll = (checked: boolean) => {
     setSelectAll(checked);
     if (checked) {
-      setSelectedDesigns(documentDesigns.map((d) => d.id));
+      setSelectedDesigns(filteredDesigns.map((d) => d.id));
     } else {
       setSelectedDesigns([]);
     }
   };
-
-  // Handler for individual row checkboxes
+  
   const handleSelectSingle = (id: string, checked: boolean) => {
     if (checked) {
       setSelectedDesigns((prev) => [...prev, id]);
@@ -92,20 +126,15 @@ const DesignCompileTab = () => {
 
   return (
     <div className="w-full space-y-4">
-      {/* Header with search and action button */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-neutral-800">
           Document Design List
         </h3>
-        <div className="flex items-center gap-2">
-          <Input type="search" placeholder="Search designs..." className="w-64" />
-          <Button disabled={selectedDesigns.length === 0}>
-            Compile Selected ({selectedDesigns.length})
-          </Button>
-        </div>
+        <Button disabled={selectedDesigns.length === 0}>
+          Compile Selected ({selectedDesigns.length})
+        </Button>
       </div>
 
-      {/* 3. Updated table with 9 columns */}
       <div className="border rounded-md">
         <Table>
           <TableHeader>
@@ -126,9 +155,22 @@ const DesignCompileTab = () => {
               <TableHead>Last Successful Compiled Date</TableHead>
               <TableHead>Compiled Status</TableHead>
             </TableRow>
+            {/* 3. New row for filter inputs */}
+            <TableRow className="bg-slate-50">
+              <TableCell></TableCell> {/* Empty cell for the checkbox column */}
+              <TableCell><Input placeholder="Filter..." value={filters.designName} onChange={e => handleFilterChange("designName", e.target.value)} /></TableCell>
+              <TableCell><Input placeholder="Filter..." value={filters.designType} onChange={e => handleFilterChange("designType", e.target.value)} /></TableCell>
+              <TableCell><Input placeholder="Filter..." value={filters.version} onChange={e => handleFilterChange("version", e.target.value)} /></TableCell>
+              <TableCell><Input placeholder="Filter..." value={filters.effectiveDate} onChange={e => handleFilterChange("effectiveDate", e.target.value)} /></TableCell>
+              <TableCell><Input placeholder="Filter..." value={filters.status} onChange={e => handleFilterChange("status", e.target.value)} /></TableCell>
+              <TableCell><Input placeholder="Filter..." value={filters.compiledBy} onChange={e => handleFilterChange("compiledBy", e.target.value)} /></TableCell>
+              <TableCell><Input placeholder="Filter..." value={filters.lastCompiledDate} onChange={e => handleFilterChange("lastCompiledDate", e.target.value)} /></TableCell>
+              <TableCell><Input placeholder="Filter..." value={filters.compiledStatus} onChange={e => handleFilterChange("compiledStatus", e.garget.value)} /></TableCell>
+            </TableRow>
           </TableHeader>
+          {/* 4. Table body now maps over the filtered data */}
           <TableBody>
-            {documentDesigns.map((design) => (
+            {filteredDesigns.map((design) => (
               <TableRow key={design.id}>
                 <TableCell>
                   <Checkbox
@@ -143,10 +185,11 @@ const DesignCompileTab = () => {
                 <TableCell>{design.effectiveDate}</TableCell>
                 <TableCell>
                   <span
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${design.status === "Active" ? "bg-green-100 text-green-800"
-                        : design.status === "In Review" ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      design.status === "Active" ? "bg-green-100 text-green-800"
+                      : design.status === "In Review" ? "bg-yellow-100 text-yellow-800"
+                      : "bg-gray-100 text-gray-800"
+                    }`}
                   >
                     {design.status}
                   </span>
@@ -155,11 +198,13 @@ const DesignCompileTab = () => {
                 <TableCell>{design.lastCompiledDate}</TableCell>
                 <TableCell>
                   <span
-                    className={`flex items-center gap-2 text-sm ${design.compiledStatus === "Success" ? "text-green-600" : "text-red-600"
-                      }`}
+                    className={`flex items-center gap-2 text-sm ${
+                      design.compiledStatus === "Success" ? "text-green-600" : "text-red-600"
+                    }`}
                   >
-                    <span className={`w-2 h-2 rounded-full ${design.compiledStatus === "Success" ? "bg-green-500" : "bg-red-500"
-                      }`}></span>
+                    <span className={`w-2 h-2 rounded-full ${
+                      design.compiledStatus === "Success" ? "bg-green-500" : "bg-red-500"
+                    }`}></span>
                     {design.compiledStatus}
                   </span>
                 </TableCell>
