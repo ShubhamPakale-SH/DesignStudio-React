@@ -1,6 +1,7 @@
 import { useState } from "react";
 import RectangleBox from "@/components/Reusable Components/RectangleBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Design = () => {
   const [value, setValue] = useState("documents");
