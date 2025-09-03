@@ -31,11 +31,14 @@ const DocumentsTab = () => {
         </div>
       </div>
 
-      <DesignList
-        designs={designs}
-        selected={selected as string | null}
-        onSelect={(name) => setSelected(name)}
-      />
+      <div className="w-[30%]">
+        <DesignList
+          designs={designs}
+          selected={selected as string | null}
+          onSelect={(name) => setSelected(name)}
+        />
+      </div>
+
     </div>
   );
 };
