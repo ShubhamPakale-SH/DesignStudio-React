@@ -31,7 +31,7 @@ const Design = () => {
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                   <SelectItem value="select">Select</SelectItem>
+                   <SelectItem value="select">--Select--</SelectItem>
                     <SelectItem value="anchor">Anchor</SelectItem>
                     <SelectItem value="masterlist">MasterList</SelectItem>
                     <SelectItem value="collateral">Collateral</SelectItem>
