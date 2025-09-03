@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DesignList from "@/components/Reusable Components/DesignList";
+import FormVersionTable, { FormVersionRow } from "@/components/Reusable Components/FormVersionTable";
 
 const DocumentsTab = () => {
   const [selected, setSelected] = useState<string | null>(null); // Tracks the selected item
@@ -43,12 +44,26 @@ const DocumentsTab = () => {
 
       {/* DesignList visible only when isDesignListVisible is true */}
       {isDesignListVisible && (
-        <div className="w-[30%]">
-          <DesignList
-            designs={designs}
-            selected={selected}
-            onSelect={(name) => setSelected(name)}
-          />
+        <div className="w-full flex flex-col gap-4 md:flex-row">
+          <div className="md:w-1/3 w-full">
+            <DesignList
+              designs={designs}
+              selected={selected}
+              onSelect={(name) => setSelected(name)}
+            />
+          </div>
+
+          {selected && selected !== "select" && (
+            <div className="md:w-2/3 w-full">
+              <FormVersionTable
+                rows={([
+                  { environment: "Development", effectiveDate: "2025-01-12", version: "1.0.0", status: "Active" },
+                  { environment: "QA", effectiveDate: "2025-02-03", version: "1.1.0", status: "Draft" },
+                  { environment: "Production", effectiveDate: "2025-03-15", version: "2.0.0", status: "Active" },
+                ]) as FormVersionRow[]}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
