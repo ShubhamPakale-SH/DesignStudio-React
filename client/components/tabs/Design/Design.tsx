@@ -6,7 +6,7 @@ const Design = () => {
   const [value, setValue] = useState("documents");
 
   return (
-    <div className="absolute top-0 left-0 p-6 ml-[70px] w-full">
+    <div className="w-full h-full flex items-left justify-center p-6">
       <RectangleBox className="max-w-3xl w-full">
         <Tabs value={value} onValueChange={setValue}>
           <div className="flex items-center justify-between">
