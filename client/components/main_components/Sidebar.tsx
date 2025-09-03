@@ -10,7 +10,7 @@ import {
 
 const items = [
   { label: "Dashboard", icon: RotateCcw },
-  { label: "Design", icon: LayoutGrid, active: true },
+  { label: "Design", icon: LayoutGrid },
   { label: "Rules Manager", icon: FileText },
   { label: "Extended Hangfire", icon: BarChart3 },
   { label: "Configuration", icon: Settings },
@@ -19,9 +19,11 @@ const items = [
 interface SidebarProps {
   open: boolean;
   onToggle: () => void;
+  selected: string;
+  onSelect: (label: string) => void;
 }
 
-const Sidebar = ({ open, onToggle }: SidebarProps) => {
+const Sidebar = ({ open, onToggle, selected, onSelect }: SidebarProps) => {
   return (
     <aside
       className={`fixed inset-y-0 left-0 z-40 bg-[#073a50] text-slate-200 border-r border-black/20 transition-all duration-300 shadow-lg ${
@@ -41,20 +43,22 @@ const Sidebar = ({ open, onToggle }: SidebarProps) => {
       </div>
 
       <nav className="p-2 space-y-2">
-        {items.map(({ label, icon: Icon, active }) => (
-          <button
-            key={label}
-            className={`group w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
-              active
-                ? "bg-[#0b5b7a] text-white"
-                : "text-slate-300 hover:bg-white/10"
-            }`}
-            title={label}
-          >
-            <Icon className="h-5 w-5 opacity-90" />
-            <span className={`${open ? "block" : "hidden"} text-sm`}>{label}</span>
-          </button>
-        ))}
+        {items.map(({ label, icon: Icon }) => {
+          const active = selected === label;
+          return (
+            <button
+              key={label}
+              onClick={() => onSelect(label)}
+              className={`group w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
+                active ? "bg-[#0b5b7a] text-white" : "text-slate-300 hover:bg-white/10"
+              }`}
+              title={label}
+            >
+              <Icon className="h-5 w-5 opacity-90" />
+              <span className={`${open ? "block" : "hidden"} text-sm`}>{label}</span>
+            </button>
+          );
+        })}
       </nav>
     </aside>
   );
