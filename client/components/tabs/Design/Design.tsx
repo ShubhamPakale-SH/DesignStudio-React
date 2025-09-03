@@ -6,11 +6,11 @@ const Design = () => {
   const [value, setValue] = useState("documents");
 
   return (
-    <div className="w-full h-full flex items-left justify-center p-6">
-      <RectangleBox className="max-w-3xl w-full">
+    <div className="w-full h-full flex items-start justify-start py-6 px-0 flex-row flex-wrap">
+      <RectangleBox className="max-w-[697px] w-[149%] flex flex-row justify-start mx-auto mt-2 pr-6 pl-4">
         <Tabs value={value} onValueChange={setValue}>
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Design</h2>
+            <h2 className="text-[20px] leading-7 font-semibold">Design</h2>
           </div>
           <TabsList className="mt-3 w-full grid grid-cols-4">
             <TabsTrigger value="documents">Documents</TabsTrigger>
