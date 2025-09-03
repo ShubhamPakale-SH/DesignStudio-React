@@ -1,7 +1,13 @@
 import { useState } from "react";
 import RectangleBox from "@/components/Reusable Components/RectangleBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Design = () => {
   const [value, setValue] = useState("documents");
@@ -31,7 +37,7 @@ const Design = () => {
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                   <SelectItem value="select">--Select--</SelectItem>
+                    <SelectItem value="select">--Select--</SelectItem>
                     <SelectItem value="anchor">Anchor</SelectItem>
                     <SelectItem value="masterlist">MasterList</SelectItem>
                     <SelectItem value="collateral">Collateral</SelectItem>
