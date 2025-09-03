@@ -42,18 +42,15 @@ const Sidebar = () => {
         {items.map(({ label, icon: Icon, active }) => (
           <button
             key={label}
-            className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
+            className={`group w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
               active
                 ? "bg-[#0b5b7a] text-white"
                 : "text-slate-300 hover:bg-white/10"
             }`}
             title={label}
-            style={{
-              justifyContent: open ? "flex-start" : "center", // Align icons centrally when collapsed
-            }}
           >
             <Icon className="h-5 w-5 opacity-90" />
-            {open && <span className="text-sm">{label}</span>}
+            <span className={`${open ? "block" : "hidden"} text-sm`}>{label}</span>
           </button>
         ))}
       </nav>
