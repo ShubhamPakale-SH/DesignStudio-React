@@ -26,7 +26,7 @@ const Design = () => {
                 Document Design Type:
               </label>
               <div className="w-56">
-                <Select defaultValue="anchor">
+                <Select >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
