@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Menu,
   X,
@@ -17,9 +16,12 @@ const items = [
   { label: "Configuration", icon: Settings },
 ];
 
-const Sidebar = () => {
-  const [open, setOpen] = useState(false);
+interface SidebarProps {
+  open: boolean;
+  onToggle: () => void;
+}
 
+const Sidebar = ({ open, onToggle }: SidebarProps) => {
   return (
     <aside
       className={`fixed inset-y-0 left-0 z-40 bg-[#073a50] text-slate-200 border-r border-black/20 transition-all duration-300 shadow-lg ${
@@ -30,7 +32,7 @@ const Sidebar = () => {
         <button
           type="button"
           aria-label={open ? "Close Menu" : "Open Menu"}
-          onClick={() => setOpen((v) => !v)}
+          onClick={onToggle}
           className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30"
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
