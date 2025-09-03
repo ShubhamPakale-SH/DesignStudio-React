@@ -22,7 +22,7 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`h-full bg-[#073a50] text-slate-200 border-r border-black/20 transition-all duration-300 ${
+      className={`fixed inset-y-0 left-0 z-40 bg-[#073a50] text-slate-200 border-r border-black/20 transition-all duration-300 shadow-lg ${
         open ? "w-72" : "w-16"
       }`}
     >
