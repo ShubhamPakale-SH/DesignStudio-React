@@ -10,7 +10,7 @@ const Header = () => {
           aria-label="User account"
           className="inline-flex items-center justify-center rounded-full p-2 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-[#2596BE]/40"
         >
-          <User className="h-5 w-5" />
+          <User className="h-6 w-6" />
         </button>
       </div>
     </header>
