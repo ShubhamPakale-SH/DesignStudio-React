@@ -48,7 +48,7 @@ export default function Index() {
           onSelect={(label) => setSelected(label as Tab)}
         />
         <main
-          className="flex-1 flex items-center justify-center shadow-[1px_1px_3px_0_rgba(0,0,0,1)] transition-[padding-left] duration-300 ease-in-out"
+          className="flex-1 flex items-start justify-start shadow-[1px_1px_3px_0_rgba(0,0,0,1)] transition-[padding-left] duration-300 ease-in-out"
           style={{ paddingLeft: sidebarOpen ? "18rem" : "4rem" }}
         >
           <Content />
