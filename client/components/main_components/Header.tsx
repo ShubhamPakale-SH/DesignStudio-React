@@ -11,7 +11,9 @@ const Header = ({ sidebarOpen }: HeaderProps) => {
       style={{ paddingLeft: sidebarOpen ? "18rem" : "4rem" }}
     >
       <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between bg-white text-[#2596BE]">
-        <span className="text-sm sm:text-base font-semibold tracking-[0.4px]">Design Studio</span>
+        <span className="text-sm sm:text-base font-semibold tracking-[0.4px]">
+          Design Studio
+        </span>
         <button
           type="button"
           aria-label="User account"
