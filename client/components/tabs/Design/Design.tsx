@@ -1,13 +1,10 @@
 import { useState } from "react";
 import RectangleBox from "@/components/Reusable Components/RectangleBox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import DocumentsTab from "@/components/tabs/Design/DocumentsTab";
+import FolderTab from "@/components/tabs/Design/FolderTab";
+import DesignCompileTab from "@/components/tabs/Design/DesignCompileTab";
+import DesignSyncTab from "@/components/tabs/Design/DesignSyncTab";
 
 const Design = () => {
   const [value, setValue] = useState("documents");
@@ -27,34 +24,16 @@ const Design = () => {
           </TabsList>
 
           <TabsContent value="documents" className="pt-4">
-            <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-neutral-700 whitespace-nowrap">
-                Document Design Type:
-              </label>
-              <div className="w-56">
-                <Select defaultValue="select">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="select">--Select--</SelectItem>
-                    <SelectItem value="anchor">Anchor</SelectItem>
-                    <SelectItem value="masterlist">MasterList</SelectItem>
-                    <SelectItem value="collateral">Collateral</SelectItem>
-                    <SelectItem value="view">View</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            <DocumentsTab />
           </TabsContent>
           <TabsContent value="folder" className="pt-4">
-            <p className="text-sm text-neutral-700">Folder content</p>
+            <FolderTab />
           </TabsContent>
           <TabsContent value="compile" className="pt-4">
-            <p className="text-sm text-neutral-700">Document Design List</p>
+            <DesignCompileTab />
           </TabsContent>
           <TabsContent value="sync" className="pt-4">
-            <p className="text-sm text-neutral-700">Design Sync Queue Detail</p>
+            <DesignSyncTab />
           </TabsContent>
         </Tabs>
       </RectangleBox>
