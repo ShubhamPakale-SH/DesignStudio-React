@@ -7,7 +7,7 @@ const Design = () => {
 
   return (
     <div className="w-full h-full flex items-start justify-start py-6 px-0 flex-row flex-wrap">
-      <RectangleBox className="w-full flex flex-row justify-start mx-auto mt-2 px-[10px]">
+      <RectangleBox className="w-full flex flex-row justify-start mx-auto mt-2 px-[50px]">
         <Tabs value={value} onValueChange={setValue}>
           <div className="flex items-center justify-between">
             <h2 className="text-[20px] leading-7 font-semibold">Design</h2>
