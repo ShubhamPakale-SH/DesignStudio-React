@@ -2,11 +2,11 @@ import { useState, useMemo } from "react";
 import Header from "@/components/main_components/Header";
 import Sidebar from "@/components/main_components/Sidebar";
 import Footer from "@/components/main_components/Footer";
-import Dashboard from "@/components/main_components/tabs/Dashboard";
-import Design from "@/components/main_components/tabs/Design";
-import RulesManager from "@/components/main_components/tabs/RulesManager";
-import ExtendedHangfire from "@/components/main_components/tabs/ExtendedHangfire";
-import Configuration from "@/components/main_components/tabs/Configuration";
+import Dashboard from "@/components/main_components/tabs/Dashboard/Dashboard";
+import Design from "@/components/main_components/tabs/Design/Design";
+import RulesManager from "@/components/main_components/tabs/RulesManager/RulesManager";
+import ExtendedHangfire from "@/components/main_components/tabs/ExtendedHangfire/ExtendedHangfire";
+import Configuration from "@/components/main_components/tabs/Configuration/Configuration";
 
 const tabs = [
   "Dashboard",
