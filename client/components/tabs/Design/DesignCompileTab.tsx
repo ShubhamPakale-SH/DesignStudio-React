@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-// 1. Import Tooltip components and necessary icons
 import {
   Tooltip,
   TooltipContent,
@@ -20,7 +19,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { RefreshCw, Copy, GitMerge, Download } from "lucide-react";
-
 
 const documentDesigns = [
   // ... (mock data remains the same)
@@ -70,7 +68,10 @@ const documentDesigns = [
   },
 ];
 
+const REFRESH_INTERVAL_SECONDS = 60;
+
 const DesignCompileTab = () => {
+  // ... (other states remain the same)
   const [selectedDesigns, setSelectedDesigns] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [filters, setFilters] = useState({
@@ -84,7 +85,36 @@ const DesignCompileTab = () => {
     compiledStatus: "",
   });
   const [filteredDesigns, setFilteredDesigns] = useState(documentDesigns);
+  
+  // 1. State for the countdown timer
+  const [countdown, setCountdown] = useState(REFRESH_INTERVAL_SECONDS);
 
+  // 2. useEffect for the timer logic
+  useEffect(() => {
+    // Function to simulate a refresh action
+    const handleRefresh = () => {
+      console.log("Refreshing grid data...");
+      // In a real app, you would re-fetch your data here.
+      // For example: fetchData().then(newData => setFilteredDesigns(newData));
+    };
+
+    // Set up an interval to decrement the counter every second
+    const timer = setInterval(() => {
+      setCountdown((prevCountdown) => {
+        if (prevCountdown <= 1) {
+          // When countdown reaches 0, refresh and reset the timer
+          handleRefresh();
+          return REFRESH_INTERVAL_SECONDS;
+        }
+        return prevCountdown - 1;
+      });
+    }, 1000);
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(timer);
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // ... (other useEffects and handlers remain the same)
   useEffect(() => {
     let data = [...documentDesigns];
     data = data.filter(d =>
@@ -125,16 +155,19 @@ const DesignCompileTab = () => {
     }
   };
 
+
   return (
-    // TooltipProvider is needed for tooltips to work
     <TooltipProvider>
       <div className="w-full space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-neutral-800">
             Document Design List
           </h3>
-          {/* 2. Replaced the old button with a new group of icon buttons */}
           <div className="flex items-center gap-2">
+            {/* 3. Added the countdown timer text */}
+            <p className="text-sm font-medium text-red-600 mr-4">
+              Auto-Refresh in {countdown} seconds.
+            </p>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -179,10 +212,10 @@ const DesignCompileTab = () => {
         </div>
 
         <div className="border rounded-md">
-          <Table>
+         {/* Table remains unchanged */}
+         <Table>
             <TableHeader>
               <TableRow>
-                 {/* Table Headers remain the same */}
                  <TableHead className="w-[50px]">
                   <Checkbox
                     checked={selectAll}
@@ -200,7 +233,6 @@ const DesignCompileTab = () => {
                 <TableHead>Compiled Status</TableHead>
               </TableRow>
               <TableRow className="bg-slate-50">
-                {/* Filter inputs remain the same */}
                 <TableCell></TableCell>
                 <TableCell><Input placeholder="Filter..." value={filters.designName} onChange={e => handleFilterChange("designName", e.target.value)} /></TableCell>
                 <TableCell><Input placeholder="Filter..." value={filters.designType} onChange={e => handleFilterChange("designType", e.target.value)} /></TableCell>
@@ -213,7 +245,6 @@ const DesignCompileTab = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* Table Body mapping remains the same */}
               {filteredDesigns.map((design) => (
               <TableRow key={design.id}>
                 <TableCell>
