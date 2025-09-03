@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/tooltip";
 import { RefreshCw, Copy, GitMerge, Download } from "lucide-react";
 
+// 1. Mock data updated to include "Complete", "Errored", and "Queued"
 const documentDesigns = [
-  // ... (mock data remains the same)
   {
     id: "D001",
     designName: "Anchor Document Template",
@@ -31,7 +31,7 @@ const documentDesigns = [
     status: "Active",
     compiledBy: "Alex Green",
     lastCompiledDate: "2023-09-28",
-    compiledStatus: "Success",
+    compiledStatus: "Complete",
   },
   {
     id: "D002",
@@ -42,7 +42,7 @@ const documentDesigns = [
     status: "Active",
     compiledBy: "Sarah Johnson",
     lastCompiledDate: "2023-09-14",
-    compiledStatus: "Success",
+    compiledStatus: "Queued",
   },
   {
     id: "D003",
@@ -53,7 +53,7 @@ const documentDesigns = [
     status: "In Review",
     compiledBy: "Michael Chen",
     lastCompiledDate: "2023-08-20",
-    compiledStatus: "Failed",
+    compiledStatus: "Errored",
   },
   {
     id: "D004",
@@ -64,14 +64,14 @@ const documentDesigns = [
     status: "Archived",
     compiledBy: "Laura Davis",
     lastCompiledDate: "2022-12-15",
-    compiledStatus: "Success",
+    compiledStatus: "Complete",
   },
 ];
 
 const REFRESH_INTERVAL_SECONDS = 60;
 
 const DesignCompileTab = () => {
-  // ... (other states remain the same)
+  // ... (all state and hooks remain the same)
   const [selectedDesigns, setSelectedDesigns] = useState<string[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [filters, setFilters] = useState({
@@ -85,36 +85,24 @@ const DesignCompileTab = () => {
     compiledStatus: "",
   });
   const [filteredDesigns, setFilteredDesigns] = useState(documentDesigns);
-  
-  // 1. State for the countdown timer
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL_SECONDS);
 
-  // 2. useEffect for the timer logic
   useEffect(() => {
-    // Function to simulate a refresh action
     const handleRefresh = () => {
       console.log("Refreshing grid data...");
-      // In a real app, you would re-fetch your data here.
-      // For example: fetchData().then(newData => setFilteredDesigns(newData));
     };
-
-    // Set up an interval to decrement the counter every second
     const timer = setInterval(() => {
       setCountdown((prevCountdown) => {
         if (prevCountdown <= 1) {
-          // When countdown reaches 0, refresh and reset the timer
           handleRefresh();
           return REFRESH_INTERVAL_SECONDS;
         }
         return prevCountdown - 1;
       });
     }, 1000);
-
-    // Cleanup function to clear the interval when the component unmounts
     return () => clearInterval(timer);
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
-  // ... (other useEffects and handlers remain the same)
   useEffect(() => {
     let data = [...documentDesigns];
     data = data.filter(d =>
@@ -155,16 +143,29 @@ const DesignCompileTab = () => {
     }
   };
 
+  // Helper function to get styles for the compiled status
+  const getCompiledStatusClass = (status: string) => {
+    switch (status) {
+      case "Complete":
+        return "text-green-600 font-medium";
+      case "Errored":
+        return "text-red-600 font-medium underline";
+      case "Queued":
+        return "text-yellow-600 font-medium";
+      default:
+        return "text-gray-800";
+    }
+  };
 
   return (
     <TooltipProvider>
       <div className="w-full space-y-4">
+        {/* Header section remains the same */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-neutral-800">
             Document Design List
           </h3>
           <div className="flex items-center gap-2">
-            {/* 3. Added the countdown timer text */}
             <p className="text-sm font-medium text-red-600 mr-4">
               Auto-Refresh in {countdown} seconds.
             </p>
@@ -212,8 +213,8 @@ const DesignCompileTab = () => {
         </div>
 
         <div className="border rounded-md">
-         {/* Table remains unchanged */}
-         <Table>
+          {/* Table and Filters remain the same */}
+          <Table>
             <TableHeader>
               <TableRow>
                  <TableHead className="w-[50px]">
@@ -258,28 +259,13 @@ const DesignCompileTab = () => {
                 <TableCell>{design.designType}</TableCell>
                 <TableCell>{design.version}</TableCell>
                 <TableCell>{design.effectiveDate}</TableCell>
-                <TableCell>
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      design.status === "Active" ? "bg-green-100 text-green-800"
-                      : design.status === "In Review" ? "bg-yellow-100 text-yellow-800"
-                      : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {design.status}
-                  </span>
-                </TableCell>
+                {/* 2. Status column updated to be plain text */}
+                <TableCell>{design.status}</TableCell>
                 <TableCell>{design.compiledBy}</TableCell>
                 <TableCell>{design.lastCompiledDate}</TableCell>
+                {/* 3. Compiled Status updated with new conditional styling */}
                 <TableCell>
-                  <span
-                    className={`flex items-center gap-2 text-sm ${
-                      design.compiledStatus === "Success" ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    <span className={`w-2 h-2 rounded-full ${
-                      design.compiledStatus === "Success" ? "bg-green-500" : "bg-red-500"
-                    }`}></span>
+                  <span className={getCompiledStatusClass(design.compiledStatus)}>
                     {design.compiledStatus}
                   </span>
                 </TableCell>
