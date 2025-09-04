@@ -1,12 +1,11 @@
 import { FORM_DESIGN_GROUP_LIST } from "../api-endpoints";
 import { BASE_URL } from "../config";
 
-const FEATURE_BASE = `${BASE_URL}/FormDesignGroup`;
 
 export type FormDesignGroupItem = Record<string, unknown>;
 
 export async function fetchFormDesignGroupList(): Promise<unknown> {
-  const url = `${FEATURE_BASE}/${FORM_DESIGN_GROUP_LIST}`;
+  const url = `${BASE_URL}/${FORM_DESIGN_GROUP_LIST}`;
   const res = await fetch(url, {
     method: "GET",
     headers: {
