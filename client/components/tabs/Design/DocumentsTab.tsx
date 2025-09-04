@@ -1,4 +1,4 @@
- import { useState } from "react";
+import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,9 +9,13 @@ import {
 import DesignList from "@/components/Reusable Components/DesignList";
 import FormVersionTable, { FormVersionRow } from "@/components/Reusable Components/FormVersionTable";
 
-const DocumentsTab = () => {
-  const [selected, setSelected] = useState<string | null>(null); // Tracks the selected item
-  const [isDesignListVisible, setDesignListVisible] = useState(false); // Controls visibility of DesignList
+interface DocumentsTabProps {
+  designTypes: string[];
+}
+
+const DocumentsTab = ({ designTypes }: DocumentsTabProps) => {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [isDesignListVisible, setDesignListVisible] = useState(false);
   const designs = ["Anchor", "MasterList", "Collateral", "View"];
 
   return (
@@ -37,6 +41,11 @@ const DocumentsTab = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="select">--Select--</SelectItem>
+              {designTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
