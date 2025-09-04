@@ -4,7 +4,9 @@ import { BASE_URL } from "../config";
 export async function fetchDesignTypes(): Promise<string[]> {
   // Build URL and add a cache-busting param to avoid stale responses
   const base = `${BASE_URL}/${Document_Design_List}`;
-  const url = base.includes("?") ? `${base}&_=${Date.now()}` : `${base}?_=${Date.now()}`;
+  const url = base.includes("?")
+    ? `${base}&_=${Date.now()}`
+    : `${base}?_=${Date.now()}`;
 
   const res = await fetch(url, {
     method: "GET",
@@ -37,7 +39,9 @@ export async function fetchDesignTypes(): Promise<string[]> {
   if (Array.isArray(data)) {
     types = data.map(extractName).filter((v): v is string => Boolean(v));
   } else if (data && Array.isArray((data as any).rows)) {
-    types = (data as any).rows.map(extractName).filter((v): v is string => Boolean(v));
+    types = (data as any).rows
+      .map(extractName)
+      .filter((v): v is string => Boolean(v));
   }
 
   // Deduplicate and keep order of first occurrence
