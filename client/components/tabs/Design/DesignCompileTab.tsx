@@ -1,4 +1,4 @@
-// Client/components/your-folder/DesignCompileTab.tsx
+// DesignCompileTab.tsx
 
 import { useState, useEffect } from "react";
 import {
@@ -24,7 +24,7 @@ import { useDocumentDesigns, DocumentDesign } from "@/hooks/useDocumentDesigns";
 const REFRESH_INTERVAL_SECONDS = 60;
 
 const DesignCompileTab = () => {
-  
+  // Fetch data, loading state, and error from the custom hook
   const {
     designs: documentDesigns,
     isLoading,
@@ -32,61 +32,65 @@ const DesignCompileTab = () => {
     refetch,
   } = useDocumentDesigns();
 
+  // State for UI interactions
   const [selectedDesigns, setSelectedDesigns] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [filters, setFilters] = useState({
-    FormName: "",
-    DocumentDesignName: "",
-    VersionNumber: "",
-    EffectiveDate: "",
-    Status: "",
-    AddedBy: "",
-    CompiledDate: "",
-    CompiledStatus: "",
+    formName: "",
+    documentDesignName: "",
+    versionNumber: "",
+    effectiveDate: "",
+    status: "",
+    addedBy: "",
+    compiledDate: "",
+    compiledStatus: "",
   });
   const [filteredDesigns, setFilteredDesigns] = useState<DocumentDesign[]>([]);
   const [countdown, setCountdown] = useState(REFRESH_INTERVAL_SECONDS);
 
+  // Effect for the auto-refresh timer
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prevCountdown) => {
         if (prevCountdown <= 1) {
           console.log("Auto-refreshing grid data...");
-          refetch(); 
+          refetch(); // Call the refetch function from the hook
           return REFRESH_INTERVAL_SECONDS;
         }
         return prevCountdown - 1;
       });
     }, 1000);
-    return () => clearInterval(timer); 
+    return () => clearInterval(timer); // Cleanup on unmount
   }, [refetch]);
 
+  // Effect for client-side filtering
   useEffect(() => {
     let data = [...documentDesigns];
     data = data.filter(
       (d) =>
-        d.FormName.toLowerCase().includes(filters.FormName.toLowerCase()) &&
-        d.DocumentDesignName.toLowerCase().includes(
-          filters.DocumentDesignName.toLowerCase()
-        ) &&
-        d.VersionNumber.toLowerCase().includes(
-          filters.VersionNumber.toLowerCase()
-        ) &&
-        d.EffectiveDate.toLowerCase().includes(
-          filters.EffectiveDate.toLowerCase()
-        ) &&
-        d.Status.toLowerCase().includes(filters.Status.toLowerCase()) &&
-        d.AddedBy.toLowerCase().includes(filters.AddedBy.toLowerCase()) &&
-        d.CompiledDate.toLowerCase().includes(
-          filters.CompiledDate.toLowerCase()
-        ) &&
-        d.CompiledStatus.toLowerCase().includes(
-          filters.CompiledStatus.toLowerCase()
-        )
+        d.formName.toLowerCase().includes(filters.formName.toLowerCase()) &&
+        d.documentDesignName
+          .toLowerCase()
+          .includes(filters.documentDesignName.toLowerCase()) &&
+        d.versionNumber
+          .toLowerCase()
+          .includes(filters.versionNumber.toLowerCase()) &&
+        (d.effectiveDate || "")
+          .toLowerCase()
+          .includes(filters.effectiveDate.toLowerCase()) &&
+        d.status.toLowerCase().includes(filters.status.toLowerCase()) &&
+        d.addedBy.toLowerCase().includes(filters.addedBy.toLowerCase()) &&
+        (d.compiledDate || "")
+          .toLowerCase()
+          .includes(filters.compiledDate.toLowerCase()) &&
+        d.compiledStatus
+          .toLowerCase()
+          .includes(filters.compiledStatus.toLowerCase())
     );
     setFilteredDesigns(data);
   }, [filters, documentDesigns]);
 
+  // Effect to sync the 'Select All' checkbox state
   useEffect(() => {
     setSelectAll(
       filteredDesigns.length > 0 &&
@@ -94,6 +98,7 @@ const DesignCompileTab = () => {
     );
   }, [selectedDesigns, filteredDesigns]);
 
+  // Handler to update a specific filter's value
   const handleFilterChange = (
     column: keyof typeof filters,
     value: string
@@ -101,15 +106,17 @@ const DesignCompileTab = () => {
     setFilters((prev) => ({ ...prev, [column]: value }));
   };
 
+  // Handler for the master 'Select All' checkbox
   const handleSelectAll = (checked: boolean) => {
     setSelectAll(checked);
     if (checked) {
-      setSelectedDesigns(filteredDesigns.map((d) => d.FormID));
+      setSelectedDesigns(filteredDesigns.map((d) => d.formID));
     } else {
       setSelectedDesigns([]);
     }
   };
 
+  // Handler for individual row checkboxes
   const handleSelectSingle = (id: number, checked: boolean) => {
     if (checked) {
       setSelectedDesigns((prev) => [...prev, id]);
@@ -118,9 +125,11 @@ const DesignCompileTab = () => {
     }
   };
 
+  // Helper function to get styles for the compiled status
   const getCompiledStatusClass = (status: string) => {
     switch (status) {
       case "Complete":
+      case "Finalized":
         return "text-green-600 font-medium";
       case "Errored":
         return "text-red-600 font-medium underline";
@@ -131,14 +140,17 @@ const DesignCompileTab = () => {
     }
   };
 
+  // Render loading state
   if (isLoading) {
     return <div className="p-8 text-center">Loading designs...</div>;
   }
 
+  // Render error state
   if (error) {
     return <div className="p-8 text-center text-red-600">Error: {error}</div>;
   }
 
+  // Render main component
   return (
     <TooltipProvider>
       <div className="w-full space-y-4">
@@ -218,72 +230,72 @@ const DesignCompileTab = () => {
                 <TableCell>
                   <Input
                     placeholder="Filter..."
-                    value={filters.FormName}
+                    value={filters.formName}
                     onChange={(e) =>
-                      handleFilterChange("FormName", e.target.value)
+                      handleFilterChange("formName", e.target.value)
                     }
                   />
                 </TableCell>
                 <TableCell>
                   <Input
                     placeholder="Filter..."
-                    value={filters.DocumentDesignName}
+                    value={filters.documentDesignName}
                     onChange={(e) =>
-                      handleFilterChange("DocumentDesignName", e.target.value)
+                      handleFilterChange("documentDesignName", e.target.value)
                     }
                   />
                 </TableCell>
                 <TableCell>
                   <Input
                     placeholder="Filter..."
-                    value={filters.VersionNumber}
+                    value={filters.versionNumber}
                     onChange={(e) =>
-                      handleFilterChange("VersionNumber", e.target.value)
+                      handleFilterChange("versionNumber", e.target.value)
                     }
                   />
                 </TableCell>
                 <TableCell>
                   <Input
                     placeholder="Filter..."
-                    value={filters.EffectiveDate}
+                    value={filters.effectiveDate}
                     onChange={(e) =>
-                      handleFilterChange("EffectiveDate", e.target.value)
+                      handleFilterChange("effectiveDate", e.target.value)
                     }
                   />
                 </TableCell>
                 <TableCell>
                   <Input
                     placeholder="Filter..."
-                    value={filters.Status}
+                    value={filters.status}
                     onChange={(e) =>
-                      handleFilterChange("Status", e.target.value)
+                      handleFilterChange("status", e.target.value)
                     }
                   />
                 </TableCell>
                 <TableCell>
                   <Input
                     placeholder="Filter..."
-                    value={filters.AddedBy}
+                    value={filters.addedBy}
                     onChange={(e) =>
-                      handleFilterChange("AddedBy", e.target.value)
+                      handleFilterChange("addedBy", e.target.value)
                     }
                   />
                 </TableCell>
                 <TableCell>
                   <Input
                     placeholder="Filter..."
-                    value={filters.CompiledDate}
+                    value={filters.compiledDate}
                     onChange={(e) =>
-                      handleFilterChange("CompiledDate", e.target.value)
+                      handleFilterChange("compiledDate", e.target.value)
                     }
                   />
                 </TableCell>
                 <TableCell>
                   <Input
                     placeholder="Filter..."
-                    value={filters.CompiledStatus}
+                    value={filters.compiledStatus}
                     onChange={(e) =>
-                      handleFilterChange("CompiledStatus", e.target.value)
+                      handleFilterChange("compiledStatus", e.target.value)
                     }
                   />
                 </TableCell>
@@ -291,32 +303,38 @@ const DesignCompileTab = () => {
             </TableHeader>
             <TableBody>
               {filteredDesigns.map((design) => (
-                <TableRow key={design.FormID}>
+                <TableRow key={design.formID}>
                   <TableCell>
                     <Checkbox
-                      checked={selectedDesigns.includes(design.FormID)}
+                      checked={selectedDesigns.includes(design.formID)}
                       onCheckedChange={(checked) =>
-                        handleSelectSingle(design.FormID, !!checked)
+                        handleSelectSingle(design.formID, !!checked)
                       }
-                      aria-label={`Select row ${design.FormID}`}
+                      aria-label={`Select row ${design.formID}`}
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{design.FormName}</TableCell>
-                  <TableCell>{design.DocumentDesignName}</TableCell>
-                  <TableCell>{design.VersionNumber}</TableCell>
-                  <TableCell>
-                    {new Date(design.EffectiveDate).toLocaleDateString()}
+                  <TableCell className="font-medium">
+                    {design.formName}
                   </TableCell>
-                  <TableCell>{design.Status}</TableCell>
-                  <TableCell>{design.AddedBy}</TableCell>
+                  <TableCell>{design.documentDesignName}</TableCell>
+                  <TableCell>{design.versionNumber}</TableCell>
                   <TableCell>
-                    {new Date(design.CompiledDate).toLocaleString()}
+                    {design.effectiveDate
+                      ? new Date(design.effectiveDate).toLocaleDateString()
+                      : "N/A"}
+                  </TableCell>
+                  <TableCell>{design.status}</TableCell>
+                  <TableCell>{design.addedBy}</TableCell>
+                  <TableCell>
+                    {design.compiledDate
+                      ? new Date(design.compiledDate).toLocaleString()
+                      : "N/A"}
                   </TableCell>
                   <TableCell>
                     <span
-                      className={getCompiledStatusClass(design.CompiledStatus)}
+                      className={getCompiledStatusClass(design.compiledStatus)}
                     >
-                      {design.CompiledStatus}
+                      {design.compiledStatus}
                     </span>
                   </TableCell>
                 </TableRow>
