@@ -1,118 +1,49 @@
-import { useState, useEffect } from "react";
+// Client/hooks/useDocumentDesigns.ts
+
+import { useState, useEffect, useCallback } from "react";
 
 export interface DocumentDesign {
-  id: string;
-  name: string;
-  designType: string;
-  version: string;
-  effectiveDate: string;
-  status: "Active" | "Draft" | "Deprecated";
-  compiledBy?: string;
-  lastSuccessfulCompiledDate?: string;
-  compiledStatus?: "Success" | "Failed" | "Pending";
+  FormID: number;
+  DisplayText: string;
+  DocumentDesignName: string;
+  VersionNumber: string;
+  Status: string;
+  CompiledStatus: string;
+  EffectiveDate: string;
+  CompiledDate: string;
+  AddedBy: string;
 }
 
-export interface UseDocumentDesignsReturn {
-  designs: DocumentDesign[];
-  loading: boolean;
-  error: string | null;
-  selectedDesign: DocumentDesign | null;
-  setSelectedDesign: (design: DocumentDesign | null) => void;
-  refreshDesigns: () => Promise<void>;
-  filterDesigns: (searchTerm: string) => DocumentDesign[];
-}
-
-export const useDocumentDesigns = (): UseDocumentDesignsReturn => {
+export const useDocumentDesigns = () => {
   const [designs, setDesigns] = useState<DocumentDesign[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDesign, setSelectedDesign] = useState<DocumentDesign | null>(null);
 
-  // Mock data - replace with actual API call
-  const mockDesigns: DocumentDesign[] = [
-    {
-      id: "1",
-      name: "Anchor Document Template",
-      designType: "Anchor",
-      version: "1.0.0",
-      effectiveDate: "2025-01-12",
-      status: "Active",
-      compiledBy: "John Doe",
-      lastSuccessfulCompiledDate: "2025-01-11",
-      compiledStatus: "Success",
-    },
-    {
-      id: "2",
-      name: "MasterList Financial Q3",
-      designType: "MasterList",
-      version: "2.1.0",
-      effectiveDate: "2025-02-03",
-      status: "Draft",
-      compiledBy: "Jane Smith",
-      lastSuccessfulCompiledDate: "2025-01-28",
-      compiledStatus: "Pending",
-    },
-    {
-      id: "3",
-      name: "Collateral Marketing Brief",
-      designType: "Collateral",
-      version: "1.5.0",
-      effectiveDate: "2025-03-15",
-      status: "Active",
-      compiledBy: "Mike Johnson",
-      lastSuccessfulCompiledDate: "2025-03-10",
-      compiledStatus: "Success",
-    },
-  ];
+  const API_URL = "https://localhost:7129/api/v2/FormDesignCompiler/DocumentDesignList";
 
-  const fetchDesigns = async () => {
+  // useCallback ensures the function isn't recreated on every render
+  const fetchDesigns = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Replace this with actual API call:
-      // const response = await fetch('/api/document-designs');
-      // const data = await response.json();
-      // setDesigns(data);
-      
-      setDesigns(mockDesigns);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch designs");
+      const response = await fetch(API_URL);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      // The actual data is in the 'rows' property of the response
+      setDesigns(data.rows || []);
+    } catch (e: any) {
+      setError(`Failed to fetch data: ${e.message}`);
+      console.error(e);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
-
-  const refreshDesigns = async () => {
-    await fetchDesigns();
-  };
-
-  const filterDesigns = (searchTerm: string): DocumentDesign[] => {
-    if (!searchTerm.trim()) return designs;
-    
-    const term = searchTerm.toLowerCase();
-    return designs.filter(design =>
-      design.name.toLowerCase().includes(term) ||
-      design.designType.toLowerCase().includes(term) ||
-      design.version.toLowerCase().includes(term) ||
-      design.status.toLowerCase().includes(term)
-    );
-  };
+  }, []);
 
   useEffect(() => {
     fetchDesigns();
-  }, []);
+  }, [fetchDesigns]);
 
-  return {
-    designs,
-    loading,
-    error,
-    selectedDesign,
-    setSelectedDesign,
-    refreshDesigns,
-    filterDesigns,
-  };
+  return { designs, isLoading, error, refetch: fetchDesigns };
 };
