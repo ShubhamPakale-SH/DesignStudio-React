@@ -10,14 +10,24 @@ import { fetchDesignTypes } from "@/service/Design/DesignService";
 
 const Design = () => {
   const [value, setValue] = useState("documents");
+  const [designTypes, setDesignTypes] = useState<string[]>([]);
 
   useEffect(() => {
-    if (value === "documents") {
-      fetchDesignTypes().catch((e) =>
-        console.error("Design types fetch failed", e),
-      );
-    }
-  }, [value]);
+    let ignore = false;
+    const loadDesignTypes = async () => {
+      if (value !== "documents" || designTypes.length > 0) return;
+      try {
+        const types = await fetchDesignTypes();
+        if (!ignore) setDesignTypes(types);
+      } catch (e) {
+        console.error("Design types fetch failed", e);
+      }
+    };
+    loadDesignTypes();
+    return () => {
+      ignore = true;
+    };
+  }, [value, designTypes.length]);
 
   return (
     <div className="w-full h-full flex items-start justify-start py-6 px-0 flex-row flex-wrap">
@@ -34,7 +44,7 @@ const Design = () => {
           </TabsList>
 
           <TabsContent value="documents" className="pt-4">
-            <DocumentsTab />
+            <DocumentsTab designTypes={designTypes} />
           </TabsContent>
           <TabsContent value="folder" className="pt-4">
             <FolderTab />

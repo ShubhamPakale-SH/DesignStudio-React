@@ -1,9 +1,7 @@
 import { Document_Design_List } from "../api-endpoints";
 import { BASE_URL } from "../config";
 
-const FEATURE_BASE = `${BASE_URL}/FormDesign`;
-
-export async function fetchDesignTypes(): Promise<unknown> {
+export async function fetchDesignTypes(): Promise<string[]> {
   const url = `${BASE_URL}/${Document_Design_List}`;
   const res = await fetch(url, {
     method: "GET",
