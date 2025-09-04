@@ -1,9 +1,7 @@
 import { Document_Design_List } from "../api-endpoints";
 import { BASE_URL } from "../config";
 
-const FEATURE_BASE = `${BASE_URL}/FormDesign`;
-
-export async function fetchDesignTypes(): Promise<unknown> {
+export async function fetchDesignTypes(): Promise<string[]> {
   const url = `${BASE_URL}/${Document_Design_List}`;
   const res = await fetch(url, {
     method: "GET",
@@ -13,5 +11,32 @@ export async function fetchDesignTypes(): Promise<unknown> {
     const text = await res.text();
     throw new Error(`GetDocumentDesignType failed (${res.status}): ${text}`);
   }
-  return res.json();
+  const data = await res.json();
+
+  const extractName = (item: any): string | null => {
+    if (typeof item === "string") return item;
+    if (!item || typeof item !== "object") return null;
+    return (
+      item.name ??
+      item.Name ??
+      item.documentDesignType ??
+      item.DocumentDesignType ??
+      item.displayText ??
+      item.DisplayText ??
+      null
+    );
+  };
+
+  let types: string[] = [];
+  if (Array.isArray(data)) {
+    types = data.map(extractName).filter((v): v is string => Boolean(v));
+  } else if (data && Array.isArray((data as any).rows)) {
+    types = (data as any).rows
+      .map(extractName)
+      .filter((v): v is string => Boolean(v));
+  }
+
+  // Deduplicate and sort for stable UI
+  const unique = Array.from(new Set(types)).filter((t) => t.trim().length > 0);
+  return unique;
 }
