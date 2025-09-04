@@ -16,7 +16,7 @@ const Design = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-[20px] leading-7 font-semibold">Design</h2>
           </div>
-          <TabsList className="mt-3 w-full grid grid-cols-4">
+          <TabsList className="mt-3 w-[520px] grid grid-cols-4">
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="folder">Folder</TabsTrigger>
             <TabsTrigger value="compile">Design Compile</TabsTrigger>
