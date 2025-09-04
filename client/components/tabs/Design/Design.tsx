@@ -5,9 +5,17 @@ import DocumentsTab from "@/components/tabs/Design/DocumentsTab";
 import FolderTab from "@/components/tabs/Design/FolderTab";
 import DesignCompileTab from "@/components/tabs/Design/DesignCompileTab";
 import DesignSyncTab from "@/components/tabs/Design/DesignSyncTab";
+import { useEffect } from "react";
+import { fetchDesignTypes } from "@/service/Design/DesignService";
 
 const Design = () => {
   const [value, setValue] = useState("documents");
+
+  useEffect(() => {
+    if (value === "documents") {
+      fetchDesignTypes().catch((e) => console.error("Design types fetch failed", e));
+    }
+  }, [value]);
 
   return (
     <div className="w-full h-full flex items-start justify-start py-6 px-0 flex-row flex-wrap">
