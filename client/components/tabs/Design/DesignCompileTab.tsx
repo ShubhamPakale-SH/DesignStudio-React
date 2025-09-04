@@ -1,6 +1,6 @@
 // DesignCompileTab.tsx
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
     Table,
     TableBody,
@@ -19,20 +19,21 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { RefreshCw, Copy, GitMerge, Download } from "lucide-react";
-import { useDocumentDesigns, DocumentDesign } from "@/hooks/useDocumentDesigns";
+// 1. Updated import to use the service file from the correct path
+import {
+    fetchDocumentDesignList,
+    DocumentDesign,
+} from "@/service/Compile/CompileService";
 
 const REFRESH_INTERVAL_SECONDS = 60;
 
 const DesignCompileTab = () => {
-    // Fetch data, loading state, and error from the custom hook
-    const {
-        designs: documentDesigns,
-        isLoading,
-        error,
-        refetch,
-    } = useDocumentDesigns();
+    // 2. States for data, loading, and error are now managed directly in this component
+    const [documentDesigns, setDocumentDesigns] = useState<DocumentDesign[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // State for UI interactions
+    // States for UI interactions (unchanged)
     const [selectedDesigns, setSelectedDesigns] = useState<number[]>([]);
     const [selectAll, setSelectAll] = useState(false);
     const [filters, setFilters] = useState({
@@ -48,27 +49,50 @@ const DesignCompileTab = () => {
     const [filteredDesigns, setFilteredDesigns] = useState<DocumentDesign[]>([]);
     const [countdown, setCountdown] = useState(REFRESH_INTERVAL_SECONDS);
 
-    // Effect for the auto-refresh timer
+    // 3. Data fetching logic is now inside the component, wrapped in useCallback
+    const refetch = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            // Call the service function to get the data
+            const data = await fetchDocumentDesignList();
+            setDocumentDesigns(data);
+        } catch (e: any) {
+            setError(`Failed to fetch data: ${e.message}`);
+            console.error(e);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []); // Empty dependency array creates the function once
+
+    // 4. useEffect to trigger the initial data fetch when the component mounts
+    useEffect(() => {
+        refetch();
+    }, [refetch]);
+
+    // Effect for the auto-refresh timer (unchanged, still uses `refetch`)
     useEffect(() => {
         const timer = setInterval(() => {
             setCountdown((prevCountdown) => {
                 if (prevCountdown <= 1) {
                     console.log("Auto-refreshing grid data...");
-                    refetch(); // Call the refetch function from the hook
+                    refetch();
                     return REFRESH_INTERVAL_SECONDS;
                 }
                 return prevCountdown - 1;
             });
         }, 1000);
-        return () => clearInterval(timer); // Cleanup on unmount
+        return () => clearInterval(timer);
     }, [refetch]);
 
-    // Effect for client-side filtering
+    // Effect for client-side filtering (unchanged)
     useEffect(() => {
         let data = [...documentDesigns];
         data = data.filter(
             (d) =>
-                (d.formName ?? "").toLowerCase().includes(filters.formName.toLowerCase()) &&
+                (d.formName ?? "")
+                    .toLowerCase()
+                    .includes(filters.formName.toLowerCase()) &&
                 (d.documentDesignName ?? "")
                     .toLowerCase()
                     .includes(filters.documentDesignName.toLowerCase()) &&
@@ -84,13 +108,14 @@ const DesignCompileTab = () => {
                     .toLowerCase()
                     .includes(filters.compiledDate.toLowerCase()) &&
                 (d.compiledStatus ?? "")
+                .trim()
                     .toLowerCase()
-                    .includes(filters.compiledStatus.toLowerCase())
+                    .includes(filters.compiledStatus.trim().toLowerCase())
         );
         setFilteredDesigns(data);
     }, [filters, documentDesigns]);
 
-    // Effect to sync the 'Select All' checkbox state
+    // All other handlers and helper functions remain exactly the same
     useEffect(() => {
         setSelectAll(
             filteredDesigns.length > 0 &&
@@ -98,7 +123,6 @@ const DesignCompileTab = () => {
         );
     }, [selectedDesigns, filteredDesigns]);
 
-    // Handler to update a specific filter's value
     const handleFilterChange = (
         column: keyof typeof filters,
         value: string
@@ -106,7 +130,6 @@ const DesignCompileTab = () => {
         setFilters((prev) => ({ ...prev, [column]: value }));
     };
 
-    // Handler for the master 'Select All' checkbox
     const handleSelectAll = (checked: boolean) => {
         setSelectAll(checked);
         if (checked) {
@@ -116,7 +139,6 @@ const DesignCompileTab = () => {
         }
     };
 
-    // Handler for individual row checkboxes
     const handleSelectSingle = (id: number, checked: boolean) => {
         if (checked) {
             setSelectedDesigns((prev) => [...prev, id]);
@@ -124,9 +146,7 @@ const DesignCompileTab = () => {
             setSelectedDesigns((prev) => prev.filter((designId) => designId !== id));
         }
     };
-
-    // Helper function to get styles for the compiled status
-  const getCompiledStatusClass = (status: string) => {
+    const getCompiledStatusClass = (status: string) => {
         switch (status) {
             case "Complete":
                 return "text-green-600 font-medium";
@@ -136,22 +156,18 @@ const DesignCompileTab = () => {
                 return "text-red-600 font-medium underline";
             case "Queued":
                 return "text-yellow-600 font-medium";
-            default:
-                return "text-gray-800";
         }
     };
 
-    // Render loading state
     if (isLoading) {
         return <div className="p-8 text-center">Loading designs...</div>;
     }
 
-    // Render error state
     if (error) {
         return <div className="p-8 text-center text-red-600">Error: {error}</div>;
     }
 
-    // Render main component
+    // The entire JSX render block is unchanged
     return (
         <TooltipProvider>
             <div className="w-full space-y-4">
@@ -333,7 +349,9 @@ const DesignCompileTab = () => {
                                     </TableCell>
                                     <TableCell>
                                         <span
-                                            className={getCompiledStatusClass(design.compiledStatus)}
+                                            className={getCompiledStatusClass(
+                                                design.compiledStatus
+                                            )}
                                         >
                                             {design.compiledStatus ?? ""}
                                         </span>
