@@ -15,7 +15,9 @@ export async function fetchFormDesignGroupList(): Promise<unknown> {
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`FormDesignGroupList request failed (${res.status}): ${text}`);
+    throw new Error(
+      `FormDesignGroupList request failed (${res.status}): ${text}`,
+    );
   }
   return res.json();
 }
