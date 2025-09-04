@@ -19,7 +19,8 @@ export const useDocumentDesigns = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_URL = "https://localhost:7129/api/v2/FormDesignCompiler/DocumentDesignList";
+  const API_URL =
+    "https://localhost:7129/api/v2/FormDesignCompiler/DocumentDesignList";
 
   // useCallback ensures the function isn't recreated on every render
   const fetchDesigns = useCallback(async () => {
