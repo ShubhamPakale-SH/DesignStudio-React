@@ -10,4 +10,4 @@ export const GetDocumentDesignList =
 
 // Design (Document Design Types)
 export const Document_Design_List =
-  "FormDesign/DocumentDesignTypeList?tenantId=1&_search=false&rows=10000&page=1&sidx=Name&sord=asc";
+  "FormDesign/GetDocumentDesignType?_=1756982427143";
