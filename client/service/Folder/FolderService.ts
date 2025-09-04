@@ -1,6 +1,6 @@
 import { FORM_DESIGN_GROUP_LIST } from "../api-endpoints";
 
-const BASE_DOMAIN = import.meta.env.VITE_API_BASE_URL as string;
+const BASE_DOMAIN = "https://localhost:7129/" as string;
 const BASE_URL = `${BASE_DOMAIN}/api/v2/FormDesignGroup`;
 
 export type FormDesignGroupItem = Record<string, unknown>;
