@@ -13,7 +13,9 @@ const Design = () => {
 
   useEffect(() => {
     if (value === "documents") {
-      fetchDesignTypes().catch((e) => console.error("Design types fetch failed", e));
+      fetchDesignTypes().catch((e) =>
+        console.error("Design types fetch failed", e),
+      );
     }
   }, [value]);
 

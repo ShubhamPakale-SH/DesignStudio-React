@@ -20,25 +20,25 @@ export interface DocumentDesign {
 const FEATURE_BASE = `${BASE_URL}/FormDesignCompiler`;
 
 export async function fetchDocumentDesignList(): Promise<DocumentDesign[]> {
-  const url = `${FEATURE_BASE}/${ GetDocumentDesignList }`;
-  
+  const url = `${FEATURE_BASE}/${GetDocumentDesignList}`;
+
   console.log("Fetching document designs from:", url);
-  
+
   const res = await fetch(url, {
     method: "GET",
     headers: { Accept: "application/json" },
   });
-  
+
   console.log("Fetch response status:", res.status);
-  
+
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`HTTP error! Status: ${res.status} - ${text}`);
   }
-  
+
   const data = await res.json();
   console.log("Fetched data:", data);
-  
+
   // Map API rows to camelCase (same logic as useDocumentDesigns)
   const mappedRows = (data.rows || []).map((row: any) => ({
     formID: row.FormID,
@@ -55,7 +55,7 @@ export async function fetchDocumentDesignList(): Promise<DocumentDesign[]> {
     errorMessage: row.ErrorMessage ?? null,
     addedBy: row.AddedBy,
   }));
-  
+
   return mappedRows;
 }
 
