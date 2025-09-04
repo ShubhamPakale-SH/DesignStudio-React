@@ -1,10 +1,10 @@
-import { FORM_DESIGN_TYPES } from "../api-endpoints";
+import { Document_Design_List } from "../api-endpoints";
 import { BASE_URL } from "../config";
 
 const FEATURE_BASE = `${BASE_URL}/FormDesign`;
 
 export async function fetchDesignTypes(): Promise<unknown> {
-  const url = `${FEATURE_BASE}/${FORM_DESIGN_TYPES}`;
+  const url = `${BASE_URL}/${Document_Design_List}`;
   const res = await fetch(url, {
     method: "GET",
     headers: { Accept: "application/json" },
