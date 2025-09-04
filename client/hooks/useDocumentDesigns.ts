@@ -2,27 +2,31 @@
 
 import { useState, useEffect, useCallback } from "react";
 
+// CHANGED: Interface updated to camelCase and nullable dates
 export interface DocumentDesign {
-  FormID: number;
-  DisplayText: string;
-  DocumentDesignName: string;
-  VersionNumber: string;
-  Status: string;
-  CompiledStatus: string;
-  EffectiveDate: string;
-  CompiledDate: string;
-  AddedBy: string;
+  formID: number;
+  formName: string;
+  displayText: string;
+  documentDesignName: string;
+  formDesignVersionID: number;
+  versionNumber: string;
+  status: string;
+  statusID: number;
+  compiledStatus: string;
+  effectiveDate: string | null;
+  compiledDate: string | null;
+  errorMessage: string | null;
+  addedBy: string;
 }
 
+// The custom hook
 export const useDocumentDesigns = () => {
   const [designs, setDesigns] = useState<DocumentDesign[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_URL =
-    "https://localhost:7129/api/v2/FormDesignCompiler/DocumentDesignList";
+  const API_URL = "https://localhost:7129/api/v2/FormDesignCompiler/DocumentDesignList?tenantId=1";
 
-  // useCallback ensures the function isn't recreated on every render
   const fetchDesigns = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -32,7 +36,6 @@ export const useDocumentDesigns = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      // The actual data is in the 'rows' property of the response
       setDesigns(data.rows || []);
     } catch (e: any) {
       setError(`Failed to fetch data: ${e.message}`);
