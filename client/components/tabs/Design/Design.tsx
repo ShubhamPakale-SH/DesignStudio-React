@@ -6,11 +6,11 @@ import FolderTab from "@/components/tabs/Design/FolderTab";
 import DesignCompileTab from "@/components/tabs/Design/DesignCompileTab";
 import DesignSyncTab from "@/components/tabs/Design/DesignSyncTab";
 import { useEffect } from "react";
-import { fetchDesignTypes } from "@/service/Design/DesignService";
+import { fetchDesignTypes, type DesignType } from "@/service/Design/DesignService";
 
 const Design = () => {
   const [value, setValue] = useState("documents");
-  const [designTypes, setDesignTypes] = useState<string[]>([]);
+  const [designTypes, setDesignTypes] = useState<DesignType[]>([]);
 
   useEffect(() => {
     let ignore = false;
