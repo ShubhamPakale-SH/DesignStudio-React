@@ -46,6 +46,7 @@ export default function DataTable<T extends Record<string, any>>({
   rowClassName,
   striped = false,
   headerBelowRow,
+  onRowClick,
 }: DataTableProps<T>) {
   return (
     <div className={cn("w-full", className)}>
