@@ -92,7 +92,6 @@ const FolderTab = () => {
         <DataTable
           columns={columns}
           data={filteredRows}
-          caption="Form Design Groups"
           emptyMessage="No groups found"
           rowKey={rowKey}
           striped
