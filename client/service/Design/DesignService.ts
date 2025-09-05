@@ -1,4 +1,4 @@
-import { Document_Design_List } from "../api-endpoints";
+import { Document_Design_List, Form_DesignList_ByDocType, FormDesign_VersionList } from "../api-endpoints";
 import { BASE_URL } from "../config";
 
 export async function fetchDesignTypes(): Promise<string[]> {
