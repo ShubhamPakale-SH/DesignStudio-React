@@ -186,7 +186,10 @@ const FolderTab = () => {
                   key: "FormDesignName",
                   header: "Document Design Name",
                   render: (r) =>
-                    (r.FormDesignName ?? r.DocumentDesignName ?? r.documentDesignName ?? "") as string,
+                    (r.FormDesignName ??
+                      r.DocumentDesignName ??
+                      r.documentDesignName ??
+                      "") as string,
                 },
                 {
                   key: "Abbreviation",
@@ -198,7 +201,10 @@ const FolderTab = () => {
                   key: "AllowMultipleInstance",
                   header: "Multiple Instance",
                   render: (r) =>
-                    (r.AllowMultipleInstance ?? r.MultipleInstance ?? r.isMultipleInstance ?? false)
+                    (r.AllowMultipleInstance ??
+                    r.MultipleInstance ??
+                    r.isMultipleInstance ??
+                    false)
                       ? "Yes"
                       : "No",
                 },
@@ -206,7 +212,9 @@ const FolderTab = () => {
                   key: "IsIncluded",
                   header: "Include",
                   render: (r) =>
-                    (r.IsIncluded ?? r.Include ?? r.include ?? false) ? "Yes" : "No",
+                    (r.IsIncluded ?? r.Include ?? r.include ?? false)
+                      ? "Yes"
+                      : "No",
                 },
               ]}
               data={mapRows}
@@ -216,7 +224,9 @@ const FolderTab = () => {
                   : "Select a folder to view mappings"
               }
               rowKey={(r, i) =>
-                (r.FormDesignId ?? r.DocumentDesignID ?? r.id ?? i) as string | number
+                (r.FormDesignId ?? r.DocumentDesignID ?? r.id ?? i) as
+                  | string
+                  | number
               }
               striped
             />
