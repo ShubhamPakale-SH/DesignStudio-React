@@ -145,8 +145,8 @@ const FolderTab = () => {
         </div>
       </div>
 
-      <div className="w-full flex flex-col gap-4 md:flex-row">
-        <div className="md:w-1/3 w-full">
+      <div className="w-full flex flex-col md:flex-row gap-6 px-2">
+        <div className="md:w-5/12 w-full pr-4">
           {loading && <p>Loading…</p>}
           {error && <p className="text-red-600">{error}</p>}
           {!loading && !error && (
@@ -167,7 +167,7 @@ const FolderTab = () => {
           )}
         </div>
 
-        <div className="md:w-2/3 w-full">
+        <div className="md:w-7/12 w-full md:mr-8 pr-8">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-semibold">
               Document Folder List{selectedName ? ` - ${selectedName}` : ""}
