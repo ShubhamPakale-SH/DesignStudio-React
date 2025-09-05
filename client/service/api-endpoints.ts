@@ -3,6 +3,8 @@
 // Folder (Form Design Group) endpoints
 export const FORM_DESIGN_GROUP_LIST =
   "FormDesignGroup/FormDesignGroupList?tenantId=1&_search=false&nd=1756967066466&rows=10000&page=1&sidx=FormGroupId&sord=asc";
+export const FORM_GROUP_MAPPING_LIST_BASE =
+  "FormDesignGroup/FormGroupMappingList?tenantId=1&formGroupId=";
 
 // Design Compile
 export const GET_DOCUMENT_DESIGN_LIST =
