@@ -1,5 +1,5 @@
 import { BASE_URL } from "../config";
-import { GetDocumentDesignList } from "../api-endpoints";
+import { GET_DOCUMENT_DESIGN_LIST } from "../api-endpoints";
 // DocumentDesign interface adapted from useDocumentDesigns.ts
 export interface DocumentDesign {
     formID: number;
@@ -20,7 +20,7 @@ export interface DocumentDesign {
 const FEATURE_BASE = `${BASE_URL}`;
 
 export async function fetchDocumentDesignList(): Promise<DocumentDesign[]> {
-    const url = `${FEATURE_BASE}/${GetDocumentDesignList}`;
+  const url = `${FEATURE_BASE}/${GET_DOCUMENT_DESIGN_LIST}`;
 
     console.log("Fetching document designs from:", url);
 
