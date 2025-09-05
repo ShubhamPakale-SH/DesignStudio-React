@@ -14,5 +14,10 @@ export const COMPILE_DESIGNS_ENDPOINT =
   "FormDesignCompiler/CompileDocumentDesignThroughHangfire";
 
 // Design (Document Design Types)
-export const Document_Design_List =
-  "FormDesign/DocumentDesignType";
+export const Document_Design_List = "FormDesign/DocumentDesignType";
+
+// Design (Documents by type and versions) - base endpoints; append required ids
+export const Form_DesignList_ByDocType =
+  "FormDesign/FormDesignListByDocType?tenantId=1&documentDesignTypeId=";
+export const FormDesign_VersionList =
+  "FormDesign/FormDesignVersionList?tenantId=1&formId=";
