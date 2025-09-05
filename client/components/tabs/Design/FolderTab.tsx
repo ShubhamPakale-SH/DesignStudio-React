@@ -40,7 +40,11 @@ const FolderTab = () => {
         key: "FormDesignGroupName",
         header: "Folder Name",
         render: (row) =>
-          (row.FormDesignGroupName ?? row.formDesignGroupName ?? row.FormGroupName ?? row.name ?? "") as string,
+          (row.FormDesignGroupName ??
+            row.formDesignGroupName ??
+            row.FormGroupName ??
+            row.name ??
+            "") as string,
       },
     ];
   }, []);
