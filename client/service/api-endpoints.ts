@@ -13,4 +13,4 @@ export const COMPILE_DESIGNS_ENDPOINT =
 
 // Design (Document Design Types)
 export const Document_Design_List =
-  "FormDesign/GetDocumentDesignType?_=1756982427143";
+  "FormDesign/DocumentDesignType";
