@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fetchFormDesignGroupList, fetchFormGroupMappingList } from "@/service/Folder/FolderService";
+import {
+  fetchFormDesignGroupList,
+  fetchFormGroupMappingList,
+} from "@/service/Folder/FolderService";
 import DataTable, {
   type DataTableColumn,
 } from "@/components/Reusable Components/DataTable";
@@ -80,14 +83,22 @@ const FolderTab = () => {
   const handleSelectRow = async (row: RowRecord, index: number) => {
     const key = rowKey(row, index);
     setSelectedKey(key);
-    const name = (row.FormDesignGroupName ?? row.formDesignGroupName ?? row.FormGroupName ?? row.name ?? "") as string;
+    const name = (row.FormDesignGroupName ??
+      row.formDesignGroupName ??
+      row.FormGroupName ??
+      row.name ??
+      "") as string;
     setSelectedName(name);
     const id = row.FormGroupId ?? row.FormGroupID ?? row.id ?? key;
     try {
       setMapLoading(true);
       setMapError(null);
       const res: any = await fetchFormGroupMappingList(id);
-      const rows = Array.isArray(res) ? res : Array.isArray(res?.rows) ? res.rows : [];
+      const rows = Array.isArray(res)
+        ? res
+        : Array.isArray(res?.rows)
+          ? res.rows
+          : [];
       setMapRows(rows);
     } catch (e) {
       setMapError(e instanceof Error ? e.message : "Request failed");
@@ -117,7 +128,12 @@ const FolderTab = () => {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base font-semibold">Document Folder List</h3>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={refetch} aria-label="Refresh">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={refetch}
+            aria-label="Refresh"
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="icon" aria-label="Add">
@@ -143,7 +159,9 @@ const FolderTab = () => {
               headerBelowRow={headerBelowRow}
               onRowClick={handleSelectRow}
               rowClassName={(row, index) =>
-                String(rowKey(row, index)) === String(selectedKey) ? "bg-sky-100" : undefined
+                String(rowKey(row, index)) === String(selectedKey)
+                  ? "bg-sky-100"
+                  : undefined
               }
             />
           )}
@@ -154,7 +172,9 @@ const FolderTab = () => {
             <h4 className="text-sm font-semibold">
               Document Folder List{selectedName ? ` - ${selectedName}` : ""}
             </h4>
-            <Button className="h-8" size="sm">Save</Button>
+            <Button className="h-8" size="sm">
+              Save
+            </Button>
           </div>
 
           {mapLoading && <p>Loading…</p>}
@@ -162,14 +182,44 @@ const FolderTab = () => {
           {!mapLoading && !mapError && (
             <DataTable
               columns={[
-                { key: "DocumentDesignName", header: "Document Design Name", render: (r) => (r.DocumentDesignName ?? r.documentDesignName ?? "") as string },
-                { key: "Abbreviation", header: "Abbreviation", render: (r) => (r.Abbreviation ?? r.abbreviation ?? "") as string },
-                { key: "MultipleInstance", header: "Multiple Instance", render: (r) => ((r.MultipleInstance ?? r.isMultipleInstance ?? false) ? "Yes" : "No") },
-                { key: "Include", header: "Include", render: (r) => ((r.Include ?? r.include ?? false) ? "Yes" : "No") },
+                {
+                  key: "DocumentDesignName",
+                  header: "Document Design Name",
+                  render: (r) =>
+                    (r.DocumentDesignName ??
+                      r.documentDesignName ??
+                      "") as string,
+                },
+                {
+                  key: "Abbreviation",
+                  header: "Abbreviation",
+                  render: (r) =>
+                    (r.Abbreviation ?? r.abbreviation ?? "") as string,
+                },
+                {
+                  key: "MultipleInstance",
+                  header: "Multiple Instance",
+                  render: (r) =>
+                    (r.MultipleInstance ?? r.isMultipleInstance ?? false)
+                      ? "Yes"
+                      : "No",
+                },
+                {
+                  key: "Include",
+                  header: "Include",
+                  render: (r) =>
+                    (r.Include ?? r.include ?? false) ? "Yes" : "No",
+                },
               ]}
               data={mapRows}
-              emptyMessage={selectedName ? "No mappings found" : "Select a folder to view mappings"}
-              rowKey={(r, i) => (r.DocumentDesignID ?? r.id ?? i) as string | number}
+              emptyMessage={
+                selectedName
+                  ? "No mappings found"
+                  : "Select a folder to view mappings"
+              }
+              rowKey={(r, i) =>
+                (r.DocumentDesignID ?? r.id ?? i) as string | number
+              }
               striped
             />
           )}
