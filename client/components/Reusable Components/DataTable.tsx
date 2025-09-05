@@ -28,6 +28,7 @@ export type DataTableProps<T> = {
   rowClassName?: (row: T, index: number) => string | undefined;
   striped?: boolean;
   headerBelowRow?: React.ReactNode;
+  onRowClick?: (row: T, index: number) => void;
 };
 
 function defaultRowKey<T>(row: T, index: number): string | number {
