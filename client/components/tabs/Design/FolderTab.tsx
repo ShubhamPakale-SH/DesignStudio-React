@@ -35,9 +35,15 @@ const FolderTab = () => {
   }, [data]);
 
   const columns: DataTableColumn<RowRecord>[] = useMemo(() => {
-    const first = rows[0] ?? {};
-    return Object.keys(first).map((key) => ({ key, header: key }));
-  }, [rows]);
+    return [
+      {
+        key: "FormDesignGroupName",
+        header: "Folder Name",
+        render: (row) =>
+          (row.FormDesignGroupName ?? row.formDesignGroupName ?? row.FormGroupName ?? row.name ?? "") as string,
+      },
+    ];
+  }, []);
 
   const rowKey = (row: RowRecord, index: number) =>
     (row.FormGroupId ?? row.FormGroupID ?? row.id ?? index) as string | number;
