@@ -24,6 +24,7 @@ export type DataTableProps<T> = {
   emptyMessage?: React.ReactNode;
   rowKey?: (row: T, index: number) => string | number;
   className?: string;
+  tableClassName?: string;
   headerRowClassName?: string;
   rowClassName?: (row: T, index: number) => string | undefined;
   striped?: boolean;
@@ -42,6 +43,7 @@ export default function DataTable<T extends Record<string, any>>({
   emptyMessage = "No data to display",
   rowKey = defaultRowKey,
   className,
+  tableClassName,
   headerRowClassName,
   rowClassName,
   striped = false,
@@ -51,7 +53,7 @@ export default function DataTable<T extends Record<string, any>>({
   return (
     <div className={cn("w-full", className)}>
       <div className="border rounded-md">
-        <Table>
+        <Table className={tableClassName}>
           {caption ? <TableCaption>{caption}</TableCaption> : null}
           <TableHeader>
             <TableRow className={headerRowClassName}>
