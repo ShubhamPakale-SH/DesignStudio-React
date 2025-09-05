@@ -81,6 +81,7 @@ export default function DataTable<T extends Record<string, any>>({
                     striped && rowIndex % 2 === 1 ? "bg-slate-50" : undefined,
                     rowClassName?.(row, rowIndex),
                   )}
+                  onClick={() => onRowClick?.(row, rowIndex)}
                 >
                   {columns.map((col, colIndex) => (
                     <TableCell
