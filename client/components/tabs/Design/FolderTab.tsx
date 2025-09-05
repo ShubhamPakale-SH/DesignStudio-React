@@ -183,12 +183,10 @@ const FolderTab = () => {
             <DataTable
               columns={[
                 {
-                  key: "DocumentDesignName",
+                  key: "FormDesignName",
                   header: "Document Design Name",
                   render: (r) =>
-                    (r.DocumentDesignName ??
-                      r.documentDesignName ??
-                      "") as string,
+                    (r.FormDesignName ?? r.DocumentDesignName ?? r.documentDesignName ?? "") as string,
                 },
                 {
                   key: "Abbreviation",
@@ -197,18 +195,18 @@ const FolderTab = () => {
                     (r.Abbreviation ?? r.abbreviation ?? "") as string,
                 },
                 {
-                  key: "MultipleInstance",
+                  key: "AllowMultipleInstance",
                   header: "Multiple Instance",
                   render: (r) =>
-                    (r.MultipleInstance ?? r.isMultipleInstance ?? false)
+                    (r.AllowMultipleInstance ?? r.MultipleInstance ?? r.isMultipleInstance ?? false)
                       ? "Yes"
                       : "No",
                 },
                 {
-                  key: "Include",
+                  key: "IsIncluded",
                   header: "Include",
                   render: (r) =>
-                    (r.Include ?? r.include ?? false) ? "Yes" : "No",
+                    (r.IsIncluded ?? r.Include ?? r.include ?? false) ? "Yes" : "No",
                 },
               ]}
               data={mapRows}
@@ -218,7 +216,7 @@ const FolderTab = () => {
                   : "Select a folder to view mappings"
               }
               rowKey={(r, i) =>
-                (r.DocumentDesignID ?? r.id ?? i) as string | number
+                (r.FormDesignId ?? r.DocumentDesignID ?? r.id ?? i) as string | number
               }
               striped
             />
