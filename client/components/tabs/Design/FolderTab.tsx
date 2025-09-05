@@ -38,6 +38,17 @@ const FolderTab = () => {
     return [];
   }, [data]);
 
+  const filteredRows = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => {
+      const name = (
+        r.FormDesignGroupName ?? r.formDesignGroupName ?? r.FormGroupName ?? r.name ?? ""
+      ) as string;
+      return String(name).toLowerCase().includes(q);
+    });
+  }, [rows, searchTerm]);
+
   const columns: DataTableColumn<RowRecord>[] = useMemo(() => {
     return [
       {
@@ -56,6 +67,21 @@ const FolderTab = () => {
   const rowKey = (row: RowRecord, index: number) =>
     (row.FormGroupId ?? row.FormGroupID ?? row.id ?? index) as string | number;
 
+  const headerBelowRow = (
+    <TableRow className="bg-slate-50 hover:bg-slate-50">
+      <TableHead>
+        <Input
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") setSearchTerm(searchInput);
+          }}
+          placeholder="Search folders and press Enter"
+        />
+      </TableHead>
+    </TableRow>
+  );
+
   return (
     <div className="text-sm text-neutral-700 w-full">
       {loading && <p>Loading…</p>}
@@ -63,11 +89,12 @@ const FolderTab = () => {
       {!loading && !error && (
         <DataTable
           columns={columns}
-          data={rows}
+          data={filteredRows}
           caption="Form Design Groups"
           emptyMessage="No groups found"
           rowKey={rowKey}
           striped
+          headerBelowRow={headerBelowRow}
         />
       )}
     </div>
