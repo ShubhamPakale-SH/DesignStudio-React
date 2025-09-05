@@ -55,3 +55,25 @@ export async function fetchDesignTypes(): Promise<string[]> {
 
   return unique;
 }
+
+export async function fetchFormDesignListByDocType(documentDesignTypeId: number | string): Promise<unknown> {
+  const base = `${BASE_URL}/${Form_DesignList_ByDocType}${encodeURIComponent(String(documentDesignTypeId))}`;
+  const url = base.includes("?") ? `${base}&_=${Date.now()}` : `${base}?_=${Date.now()}`;
+  const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`FormDesignListByDocType failed (${res.status}): ${text}`);
+  }
+  return res.json();
+}
+
+export async function fetchFormDesignVersionList(formId: number | string): Promise<unknown> {
+  const base = `${BASE_URL}/${FormDesign_VersionList}${encodeURIComponent(String(formId))}`;
+  const url = base.includes("?") ? `${base}&_=${Date.now()}` : `${base}?_=${Date.now()}`;
+  const res = await fetch(url, { method: "GET", headers: { Accept: "application/json" } });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`FormDesignVersionList failed (${res.status}): ${text}`);
+  }
+  return res.json();
+}
