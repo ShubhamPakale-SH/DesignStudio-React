@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchFormDesignGroupList } from "@/service/Folder/FolderService";
-import DataTable, { type DataTableColumn } from "@/components/Reusable Components/DataTable";
+import DataTable, {
+  type DataTableColumn,
+} from "@/components/Reusable Components/DataTable";
 
 type RowRecord = Record<string, any>;
 
@@ -27,7 +29,8 @@ const FolderTab = () => {
   const rows: RowRecord[] = useMemo(() => {
     const payload = data as any;
     if (Array.isArray(payload)) return payload as RowRecord[];
-    if (payload && Array.isArray(payload.rows)) return payload.rows as RowRecord[];
+    if (payload && Array.isArray(payload.rows))
+      return payload.rows as RowRecord[];
     return [];
   }, [data]);
 

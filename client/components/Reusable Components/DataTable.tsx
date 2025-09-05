@@ -61,7 +61,10 @@ export default function DataTable<T extends Record<string, any>>({
           <TableBody>
             {data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   {emptyMessage}
                 </TableCell>
               </TableRow>
@@ -71,12 +74,17 @@ export default function DataTable<T extends Record<string, any>>({
                   key={String(rowKey(row, rowIndex))}
                   className={cn(
                     striped && rowIndex % 2 === 1 ? "bg-slate-50" : undefined,
-                    rowClassName?.(row, rowIndex)
+                    rowClassName?.(row, rowIndex),
                   )}
                 >
                   {columns.map((col, colIndex) => (
-                    <TableCell key={String(col.key) + colIndex} className={col.className}>
-                      {col.render ? col.render(row, rowIndex) : String((row as any)[col.key as any] ?? "")}
+                    <TableCell
+                      key={String(col.key) + colIndex}
+                      className={col.className}
+                    >
+                      {col.render
+                        ? col.render(row, rowIndex)
+                        : String((row as any)[col.key as any] ?? "")}
                     </TableCell>
                   ))}
                 </TableRow>
