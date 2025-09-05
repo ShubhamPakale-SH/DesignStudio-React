@@ -229,6 +229,7 @@ const FolderTab = () => {
                   | number
               }
               striped
+              tableClassName="border-separate border-spacing-x-4 border-spacing-y-0"
             />
           )}
         </div>
