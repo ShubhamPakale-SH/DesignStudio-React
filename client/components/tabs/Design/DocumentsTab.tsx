@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -10,15 +10,18 @@ import DesignList from "@/components/Reusable Components/DesignList";
 import FormVersionTable, {
   FormVersionRow,
 } from "@/components/Reusable Components/FormVersionTable";
+import { fetchFormDesignListByDocType, type DesignType } from "@/service/Design/DesignService";
 
 interface DocumentsTabProps {
-  designTypes: string[];
+  designTypes: DesignType[];
 }
 
 const DocumentsTab = ({ designTypes }: DocumentsTabProps) => {
   const [selected, setSelected] = useState<string | null>(null);
-  const [isDesignListVisible, setDesignListVisible] = useState(false);
-  const designs = ["Anchor", "MasterList", "Collateral", "View"];
+  const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
+  const [designs, setDesigns] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -29,23 +32,33 @@ const DocumentsTab = ({ designTypes }: DocumentsTabProps) => {
         </label>
         <div className="w-56">
           <Select
-            onValueChange={(value) => {
-              if (value === "select") {
-                setDesignListVisible(true); // Show DesignList when "--Select--" is chosen
-              } else {
-                setDesignListVisible(false); // Hide DesignList for other options (if any)
+            onValueChange={async (value) => {
+              setSelectedTypeId(value);
+              setSelected(null);
+              setError(null);
+              setLoading(true);
+              try {
+                const res: any = await fetchFormDesignListByDocType(value);
+                const rows = Array.isArray(res) ? res : Array.isArray(res?.rows) ? res.rows : [];
+                const names: string[] = rows
+                  .map((r: any) => r.FormDesignName ?? r.DocumentDesignName ?? r.formDesignName ?? "")
+                  .filter((s: string) => !!s && s.trim().length > 0);
+                setDesigns(Array.from(new Set(names)));
+              } catch (e) {
+                setError(e instanceof Error ? e.message : "Request failed");
+                setDesigns([]);
+              } finally {
+                setLoading(false);
               }
-              setSelected(value);
             }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="select">--Select--</SelectItem>
-              {designTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
+              {designTypes.map((dt) => (
+                <SelectItem key={String(dt.id)} value={String(dt.id)}>
+                  {dt.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -53,47 +66,31 @@ const DocumentsTab = ({ designTypes }: DocumentsTabProps) => {
         </div>
       </div>
 
-      {/* DesignList visible only when isDesignListVisible is true */}
-      {isDesignListVisible && (
-        <div className="w-full flex flex-col gap-4 md:flex-row">
-          <div className="md:w-1/3 w-full">
+      <div className="w-full flex flex-col gap-4 md:flex-row">
+        <div className="md:w-1/3 w-full">
+          {loading && <p className="text-sm">Loading…</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          {!loading && !error && (
             <DesignList
               designs={designs}
               selected={selected}
               onSelect={(name) => setSelected(name)}
             />
-          </div>
-
-          {selected && selected !== "select" && (
-            <div className="md:w-2/3 w-full">
-              <FormVersionTable
-                rows={
-                  [
-                    {
-                      environment: "Development",
-                      effectiveDate: "2025-01-12",
-                      version: "1.0.0",
-                      status: "Active",
-                    },
-                    {
-                      environment: "QA",
-                      effectiveDate: "2025-02-03",
-                      version: "1.1.0",
-                      status: "Draft",
-                    },
-                    {
-                      environment: "Production",
-                      effectiveDate: "2025-03-15",
-                      version: "2.0.0",
-                      status: "Active",
-                    },
-                  ] as FormVersionRow[]
-                }
-              />
-            </div>
           )}
         </div>
-      )}
+
+        {selected && selectedTypeId && (
+          <div className="md:w-2/3 w-full">
+            <FormVersionTable
+              rows={([
+                { environment: "Development", effectiveDate: "2025-01-12", version: "1.0.0", status: "Active" },
+                { environment: "QA", effectiveDate: "2025-02-03", version: "1.1.0", status: "Draft" },
+                { environment: "Production", effectiveDate: "2025-03-15", version: "2.0.0", status: "Active" },
+              ]) as FormVersionRow[]}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
