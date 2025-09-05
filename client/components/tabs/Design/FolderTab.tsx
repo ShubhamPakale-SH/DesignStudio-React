@@ -42,9 +42,11 @@ const FolderTab = () => {
     const q = searchTerm.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter((r) => {
-      const name = (
-        r.FormDesignGroupName ?? r.formDesignGroupName ?? r.FormGroupName ?? r.name ?? ""
-      ) as string;
+      const name = (r.FormDesignGroupName ??
+        r.formDesignGroupName ??
+        r.FormGroupName ??
+        r.name ??
+        "") as string;
       return String(name).toLowerCase().includes(q);
     });
   }, [rows, searchTerm]);
