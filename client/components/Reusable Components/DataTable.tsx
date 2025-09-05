@@ -27,6 +27,7 @@ export type DataTableProps<T> = {
   headerRowClassName?: string;
   rowClassName?: (row: T, index: number) => string | undefined;
   striped?: boolean;
+  headerBelowRow?: React.ReactNode;
 };
 
 function defaultRowKey<T>(row: T, index: number): string | number {
@@ -43,6 +44,7 @@ export default function DataTable<T extends Record<string, any>>({
   headerRowClassName,
   rowClassName,
   striped = false,
+  headerBelowRow,
 }: DataTableProps<T>) {
   return (
     <div className={cn("w-full", className)}>
@@ -57,6 +59,7 @@ export default function DataTable<T extends Record<string, any>>({
                 </TableHead>
               ))}
             </TableRow>
+            {headerBelowRow}
           </TableHeader>
           <TableBody>
             {data.length === 0 ? (
