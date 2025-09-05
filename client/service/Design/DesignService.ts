@@ -41,20 +41,31 @@ export async function fetchDesignTypes(): Promise<DesignType[]> {
     );
   };
 
-  let types: string[] = [];
-  if (Array.isArray(data)) {
-    types = data.map(extractName).filter((v): v is string => Boolean(v));
-  } else if (data && Array.isArray((data as any).rows)) {
-    types = (data as any).rows
-      .map(extractName)
-      .filter((v): v is string => Boolean(v));
-  }
+  const extractId = (item: any): number | string | null => {
+    if (!item || typeof item !== "object") return null;
+    return (
+      item.DocumentDesignTypeID ??
+      item.documentDesignTypeId ??
+      item.DocumentDesignTypeId ??
+      item.Id ??
+      item.id ??
+      null
+    );
+  };
 
-  // Deduplicate and keep order of first occurrence
+  let items: any[] = [];
+  if (Array.isArray(data)) items = data;
+  else if (data && Array.isArray((data as any).rows)) items = (data as any).rows;
+
+  const mapped: DesignType[] = items
+    .map((it) => ({ id: extractId(it), name: extractName(it) }))
+    .filter((x): x is DesignType => x.id != null && !!x.name && String(x.name).trim().length > 0);
+
+  // Deduplicate by id, keep first occurrence
   const seen = new Set<string>();
-  const unique = types.filter((t) => {
-    const key = t.trim();
-    if (!key || seen.has(key)) return false;
+  const unique = mapped.filter((t) => {
+    const key = String(t.id);
+    if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
