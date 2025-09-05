@@ -92,7 +92,12 @@ const FolderTab = () => {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base font-semibold">Document Folder List</h3>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={refetch} aria-label="Refresh">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={refetch}
+            aria-label="Refresh"
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="icon" aria-label="Add">
