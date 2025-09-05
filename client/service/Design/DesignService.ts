@@ -5,7 +5,10 @@ import {
 } from "../api-endpoints";
 import { BASE_URL } from "../config";
 
-export interface DesignType { id: number | string; name: string }
+export interface DesignType {
+  id: number | string;
+  name: string;
+}
 
 export async function fetchDesignTypes(): Promise<DesignType[]> {
   // Build URL and add a cache-busting param to avoid stale responses
@@ -55,11 +58,15 @@ export async function fetchDesignTypes(): Promise<DesignType[]> {
 
   let items: any[] = [];
   if (Array.isArray(data)) items = data;
-  else if (data && Array.isArray((data as any).rows)) items = (data as any).rows;
+  else if (data && Array.isArray((data as any).rows))
+    items = (data as any).rows;
 
   const mapped: DesignType[] = items
     .map((it) => ({ id: extractId(it), name: extractName(it) }))
-    .filter((x): x is DesignType => x.id != null && !!x.name && String(x.name).trim().length > 0);
+    .filter(
+      (x): x is DesignType =>
+        x.id != null && !!x.name && String(x.name).trim().length > 0,
+    );
 
   // Deduplicate by id, keep first occurrence
   const seen = new Set<string>();

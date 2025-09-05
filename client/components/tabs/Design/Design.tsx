@@ -6,7 +6,10 @@ import FolderTab from "@/components/tabs/Design/FolderTab";
 import DesignCompileTab from "@/components/tabs/Design/DesignCompileTab";
 import DesignSyncTab from "@/components/tabs/Design/DesignSyncTab";
 import { useEffect } from "react";
-import { fetchDesignTypes, type DesignType } from "@/service/Design/DesignService";
+import {
+  fetchDesignTypes,
+  type DesignType,
+} from "@/service/Design/DesignService";
 
 const Design = () => {
   const [value, setValue] = useState("documents");

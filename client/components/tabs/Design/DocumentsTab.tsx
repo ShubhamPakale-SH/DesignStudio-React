@@ -10,7 +10,10 @@ import DesignList from "@/components/Reusable Components/DesignList";
 import FormVersionTable, {
   FormVersionRow,
 } from "@/components/Reusable Components/FormVersionTable";
-import { fetchFormDesignListByDocType, type DesignType } from "@/service/Design/DesignService";
+import {
+  fetchFormDesignListByDocType,
+  type DesignType,
+} from "@/service/Design/DesignService";
 
 interface DocumentsTabProps {
   designTypes: DesignType[];
@@ -39,9 +42,19 @@ const DocumentsTab = ({ designTypes }: DocumentsTabProps) => {
               setLoading(true);
               try {
                 const res: any = await fetchFormDesignListByDocType(value);
-                const rows = Array.isArray(res) ? res : Array.isArray(res?.rows) ? res.rows : [];
+                const rows = Array.isArray(res)
+                  ? res
+                  : Array.isArray(res?.rows)
+                    ? res.rows
+                    : [];
                 const names: string[] = rows
-                  .map((r: any) => r.FormDesignName ?? r.DocumentDesignName ?? r.formDesignName ?? "")
+                  .map(
+                    (r: any) =>
+                      r.FormDesignName ??
+                      r.DocumentDesignName ??
+                      r.formDesignName ??
+                      "",
+                  )
                   .filter((s: string) => !!s && s.trim().length > 0);
                 setDesigns(Array.from(new Set(names)));
               } catch (e) {
@@ -82,11 +95,28 @@ const DocumentsTab = ({ designTypes }: DocumentsTabProps) => {
         {selected && selectedTypeId && (
           <div className="md:w-2/3 w-full">
             <FormVersionTable
-              rows={([
-                { environment: "Development", effectiveDate: "2025-01-12", version: "1.0.0", status: "Active" },
-                { environment: "QA", effectiveDate: "2025-02-03", version: "1.1.0", status: "Draft" },
-                { environment: "Production", effectiveDate: "2025-03-15", version: "2.0.0", status: "Active" },
-              ]) as FormVersionRow[]}
+              rows={
+                [
+                  {
+                    environment: "Development",
+                    effectiveDate: "2025-01-12",
+                    version: "1.0.0",
+                    status: "Active",
+                  },
+                  {
+                    environment: "QA",
+                    effectiveDate: "2025-02-03",
+                    version: "1.1.0",
+                    status: "Draft",
+                  },
+                  {
+                    environment: "Production",
+                    effectiveDate: "2025-03-15",
+                    version: "2.0.0",
+                    status: "Active",
+                  },
+                ] as FormVersionRow[]
+              }
             />
           </div>
         )}
