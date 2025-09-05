@@ -5,7 +5,9 @@ import {
 } from "../api-endpoints";
 import { BASE_URL } from "../config";
 
-export async function fetchDesignTypes(): Promise<string[]> {
+export interface DesignType { id: number | string; name: string }
+
+export async function fetchDesignTypes(): Promise<DesignType[]> {
   // Build URL and add a cache-busting param to avoid stale responses
   const base = `${BASE_URL}/${Document_Design_List}`;
   const url = base.includes("?")
