@@ -78,7 +78,7 @@ const FolderTab = () => {
           onKeyDown={(e) => {
             if (e.key === "Enter") setSearchTerm(searchInput);
           }}
-          placeholder="Search folders and press Enter"
+          placeholder="Search folders"
         />
       </TableHead>
     </TableRow>
