@@ -17,20 +17,21 @@ const FolderTab = () => {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        setLoading(true);
-        const res = await fetchFormDesignGroupList();
-        setData(res);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Request failed");
-      } finally {
-        setLoading(false);
-      }
-    };
-    run();
+  const refetch = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetchFormDesignGroupList();
+      setData(res);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Request failed");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const rows: RowRecord[] = useMemo(() => {
     const payload = data as any;
