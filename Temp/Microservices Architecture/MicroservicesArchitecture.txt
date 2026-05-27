@@ -1,0 +1,507 @@
+================================================================
+           MICROSERVICES ARCHITECTURE
+================================================================
+
+WHAT IS MICROSERVICES ARCHITECTURE?
+--------------------------
+Microservices Architecture is a software design approach where
+an application is built as a collection of small, independent,
+loosely coupled services. Each service:
+  - Runs in its own process.
+  - Owns its own database.
+  - Is responsible for a single business capability.
+  - Communicates via APIs (REST, gRPC) or messaging (Kafka, RabbitMQ).
+  - Can be deployed, scaled, and updated independently.
+
+Coined by Martin Fowler and James Lewis (2014).
+
+
+================================================================
+MONOLITHIC vs MICROSERVICES
+================================================================
+
+MONOLITHIC APPLICATION:
+  [UI] --> [Single Large Application]
+                  |
+           [Single Database]
+
+  - All features in one deployable unit.
+  - Simple to develop initially.
+  - Hard to scale specific parts.
+  - One bug can bring down the whole app.
+  - Long build and deployment cycles.
+
+MICROSERVICES APPLICATION:
+  [API Gateway]
+       |
+  _____|_________________________________________________
+  |           |           |           |                 |
+[User      [Order      [Payment    [Inventory      [Notification
+ Service]   Service]    Service]    Service]        Service]
+  |           |           |           |                 |
+[User DB]  [Order DB] [Payment DB][Inventory DB]  [Notification DB]
+
+  - Each service is independently deployable.
+  - Each service can use different technology stack.
+  - Easier to scale individual services.
+  - Fault in one service does not crash others.
+  - Faster deployment cycles.
+
+
+================================================================
+CORE COMPONENTS OF MICROSERVICES
+================================================================
+
+1. API GATEWAY
+   - Single entry point for all client requests.
+   - Handles: routing, authentication, rate limiting,
+     load balancing, SSL termination, request aggregation.
+   - Examples: Spring Cloud Gateway, Kong, AWS API Gateway, Nginx.
+
+   Client --> [API Gateway] --> [User Service]
+                           --> [Order Service]
+                           --> [Payment Service]
+
+2. SERVICE REGISTRY & DISCOVERY
+   - Services register themselves on startup.
+   - Other services look up the registry to find instances.
+   - Enables dynamic scaling and load balancing.
+   - Examples: Eureka (Netflix), Consul, Zookeeper.
+
+   Types:
+   a) Client-Side Discovery: client queries registry and
+      picks an instance (Ribbon + Eureka).
+   b) Server-Side Discovery: load balancer queries registry
+      (AWS ELB, Nginx).
+
+3. LOAD BALANCER
+   - Distributes traffic across multiple service instances.
+   - Client-side: Ribbon, Spring Cloud LoadBalancer.
+   - Server-side: Nginx, HAProxy, AWS ALB.
+
+4. CONFIG SERVER
+   - Centralized configuration management.
+   - Services fetch config at startup or runtime.
+   - Examples: Spring Cloud Config Server, Consul, AWS SSM.
+
+5. CIRCUIT BREAKER
+   - Prevents cascading failures when a service is down.
+   - States: CLOSED (normal) → OPEN (failing) → HALF-OPEN (testing).
+   - Examples: Resilience4j, Hystrix (deprecated).
+
+6. MESSAGE BROKER
+   - Enables async communication between services.
+   - Decouples producer and consumer.
+   - Examples: Apache Kafka, RabbitMQ, AWS SQS.
+
+7. DISTRIBUTED TRACING
+   - Tracks a request as it flows through multiple services.
+   - Assigns a unique Trace ID to each request.
+   - Examples: Zipkin, Jaeger, AWS X-Ray.
+
+8. CENTRALIZED LOGGING
+   - Aggregates logs from all services into one place.
+   - ELK Stack: Elasticsearch + Logstash + Kibana.
+   - EFK Stack: Elasticsearch + Fluentd + Kibana.
+
+9. HEALTH MONITORING
+   - Continuously monitors service health and metrics.
+   - Examples: Prometheus + Grafana, Spring Boot Actuator.
+
+10. CONTAINER ORCHESTRATION
+    - Manages deployment, scaling, and networking of containers.
+    - Examples: Kubernetes (K8s), Docker Swarm.
+
+
+================================================================
+COMMUNICATION PATTERNS
+================================================================
+
+SYNCHRONOUS COMMUNICATION:
+--------------------------
+  a) REST (HTTP/HTTPS)
+     - Simple, widely supported.
+     - Stateless, uses JSON/XML.
+     - Tools: RestTemplate, WebClient, OpenFeign.
+
+  b) gRPC
+     - Google Remote Procedure Call.
+     - Uses Protocol Buffers (binary format) — faster than JSON.
+     - Supports streaming.
+     - Best for: internal service-to-service calls.
+
+  c) GraphQL
+     - Client specifies exact data needed.
+     - Reduces over-fetching and under-fetching.
+
+ASYNCHRONOUS COMMUNICATION:
+--------------------------
+  a) Event-Driven (Kafka / RabbitMQ)
+     - Producer publishes event, consumer reacts.
+     - Services are fully decoupled.
+     - Best for: order placed → notify → update inventory.
+
+  b) SAGA Pattern
+     - Manages distributed transactions via events.
+     - Choreography: each service publishes events.
+     - Orchestration: a central saga orchestrator directs.
+
+  Sync vs Async:
+  Feature          | Synchronous      | Asynchronous
+  -----------------|------------------|------------------
+  Coupling         | Tight            | Loose
+  Response         | Immediate        | Eventual
+  Failure handling | Circuit breaker  | Retry / DLQ
+  Best for         | Query operations | State changes
+
+
+================================================================
+KEY DESIGN PATTERNS
+================================================================
+
+1. API GATEWAY PATTERN
+   - Central entry point; hides internal service topology.
+
+2. SERVICE REGISTRY PATTERN
+   - Dynamic service discovery without hardcoded URLs.
+
+3. CIRCUIT BREAKER PATTERN
+   - Fail fast; avoid waiting for a down service.
+   - CLOSED  : requests pass through normally.
+   - OPEN    : all requests fail immediately (no calls made).
+   - HALF-OPEN: limited requests allowed to test recovery.
+
+4. SAGA PATTERN
+   - Distributed transactions across multiple services.
+   - Each step has a compensating transaction for rollback.
+   Example:
+     Order Service  → reserve order
+     Payment Service → charge card
+     Inventory Service → reduce stock
+     If payment fails → compensate: cancel order, restore stock.
+
+5. CQRS (Command Query Responsibility Segregation)
+   - Separate read model from write model.
+   - Write (Command): updates state.
+   - Read (Query): optimized for reads.
+   - Often combined with Event Sourcing.
+
+6. EVENT SOURCING
+   - Store all state changes as a sequence of events.
+   - Rebuild state by replaying events.
+   - Provides full audit trail.
+
+7. STRANGLER FIG PATTERN
+   - Gradually replace monolith with microservices.
+   - New features built as services; old features migrated over.
+
+8. SIDECAR PATTERN
+   - Deploy a helper container alongside the main service.
+   - Handles: logging, monitoring, service mesh (Envoy proxy).
+
+9. BULKHEAD PATTERN
+   - Isolate failures to a portion of the system.
+   - Thread pool isolation: each service gets its own pool.
+
+10. OUTBOX PATTERN
+    - Ensure database write and event publish happen atomically.
+    - Write to DB and an Outbox table in one transaction.
+    - Separate process reads Outbox and publishes events.
+
+
+================================================================
+SPRING CLOUD COMPONENTS
+================================================================
+
+  Component                  | Purpose
+  ---------------------------|----------------------------------
+  Spring Cloud Gateway       | API Gateway
+  Spring Cloud Eureka        | Service Registry & Discovery
+  Spring Cloud Config        | Centralized Configuration
+  Spring Cloud OpenFeign     | Declarative REST Client
+  Spring Cloud LoadBalancer  | Client-side Load Balancing
+  Resilience4j               | Circuit Breaker, Retry, Rate Limit
+  Spring Cloud Sleuth        | Distributed Tracing (Trace/Span ID)
+  Spring Cloud Stream        | Kafka/RabbitMQ abstraction
+  Spring Cloud Bus           | Broadcast config changes via MQ
+  Spring Boot Actuator       | Health checks & metrics
+
+
+================================================================
+INTER-SERVICE COMMUNICATION WITH OPENFEIGN
+================================================================
+
+  @FeignClient(name = "order-service", url = "${order.service.url}")
+  public interface OrderClient {
+
+      @GetMapping("/api/orders/{id}")
+      OrderResponse getOrder(@PathVariable Long id);
+
+      @PostMapping("/api/orders")
+      OrderResponse createOrder(@RequestBody OrderRequest request);
+  }
+
+  // Usage in another service
+  @Service
+  public class PaymentService {
+      private final OrderClient orderClient;
+
+      public void processPayment(Long orderId) {
+          OrderResponse order = orderClient.getOrder(orderId);
+          // process payment for order...
+      }
+  }
+
+
+================================================================
+CIRCUIT BREAKER WITH RESILIENCE4J
+================================================================
+
+  @RestController
+  public class OrderController {
+
+      @GetMapping("/orders/{id}")
+      @CircuitBreaker(name = "orderService", fallbackMethod = "fallback")
+      @Retry(name = "orderService")
+      @TimeLimiter(name = "orderService")
+      public OrderResponse getOrder(@PathVariable Long id) {
+          return orderClient.getOrder(id);
+      }
+
+      public OrderResponse fallback(Long id, Exception ex) {
+          return new OrderResponse("Default order", "UNAVAILABLE");
+      }
+  }
+
+  # application.yml
+  resilience4j:
+    circuitbreaker:
+      instances:
+        orderService:
+          slidingWindowSize: 10
+          failureRateThreshold: 50
+          waitDurationInOpenState: 10s
+          permittedNumberOfCallsInHalfOpenState: 3
+    retry:
+      instances:
+        orderService:
+          maxAttempts: 3
+          waitDuration: 500ms
+
+
+================================================================
+SERVICE DISCOVERY WITH EUREKA
+================================================================
+
+Eureka Server:
+  @SpringBootApplication
+  @EnableEurekaServer
+  public class EurekaServerApp { ... }
+
+  # application.yml
+  server.port: 8761
+  eureka.client.register-with-eureka: false
+  eureka.client.fetch-registry: false
+
+Eureka Client (each microservice):
+  @SpringBootApplication
+  @EnableDiscoveryClient
+  public class OrderServiceApp { ... }
+
+  # application.yml
+  spring.application.name: order-service
+  eureka.client.service-url.defaultZone: http://localhost:8761/eureka/
+
+
+================================================================
+CENTRALIZED CONFIG SERVER
+================================================================
+
+Config Server:
+  @SpringBootApplication
+  @EnableConfigServer
+  public class ConfigServerApp { ... }
+
+  # application.yml
+  spring.cloud.config.server.git.uri: https://github.com/org/config-repo
+
+Client Service:
+  # bootstrap.yml
+  spring.application.name: order-service
+  spring.cloud.config.uri: http://localhost:8888
+
+  # Config file in Git repo: order-service.yml
+  order:
+    max-items: 100
+    timeout: 5000
+
+
+================================================================
+DISTRIBUTED TRACING
+================================================================
+Every request gets:
+  - Trace ID  : unique ID for the entire request journey.
+  - Span ID   : unique ID for each service hop.
+
+  [API Gateway] --TraceId=abc123, SpanId=001-->
+  [Order Service] --TraceId=abc123, SpanId=002-->
+  [Payment Service] --TraceId=abc123, SpanId=003-->
+
+Tools:
+  - Spring Cloud Sleuth : automatically adds Trace/Span IDs.
+  - Zipkin              : collects and visualizes traces.
+  - Micrometer Tracing  : Spring Boot 3+ tracing abstraction.
+
+
+================================================================
+SECURITY IN MICROSERVICES
+================================================================
+
+1. JWT (JSON Web Token)
+   - User logs in at Auth Service → receives JWT token.
+   - JWT passed in Authorization header for every request.
+   - API Gateway or each service validates the token.
+
+2. OAuth2 + OpenID Connect
+   - OAuth2 for authorization, OIDC for authentication.
+   - Spring Authorization Server, Keycloak, Auth0.
+
+3. mTLS (Mutual TLS)
+   - Both client and server present certificates.
+   - Ensures service-to-service trust.
+
+4. API Gateway Security
+   - Rate limiting, IP whitelisting, JWT validation at gateway.
+
+
+================================================================
+DATABASE PATTERNS
+================================================================
+
+1. DATABASE PER SERVICE
+   - Each service owns its own database.
+   - No shared database between services.
+   - Enables polyglot persistence (different DB per service).
+
+2. SHARED DATABASE (anti-pattern)
+   - Multiple services share one database.
+   - Creates tight coupling — avoid this.
+
+3. POLYGLOT PERSISTENCE
+   Service        | Database
+   ---------------|------------------
+   User Service   | PostgreSQL
+   Product Service| MongoDB
+   Cart Service   | Redis
+   Search Service | Elasticsearch
+   Analytics      | Apache Cassandra
+
+4. SAGA PATTERN (Distributed Transactions)
+   - No 2-phase commit in microservices.
+   - Use SAGA with compensating transactions instead.
+
+
+================================================================
+DEPLOYMENT & DEVOPS
+================================================================
+
+1. CONTAINERIZATION
+   - Each service packaged as a Docker image.
+   - Dockerfile per service.
+
+2. CONTAINER ORCHESTRATION
+   - Kubernetes (K8s) manages:
+     * Deployment, scaling, rolling updates
+     * Service discovery (DNS-based)
+     * Load balancing (Service/Ingress)
+     * Self-healing (restarts failed pods)
+
+3. CI/CD PIPELINE
+   Code → Git → Build → Test → Docker Build →
+   Push to Registry → Deploy to K8s
+
+4. SERVICE MESH (Istio / Linkerd)
+   - Infrastructure layer for service-to-service communication.
+   - Handles: mTLS, retries, circuit breaking, tracing,
+     load balancing — all without changing app code.
+   - Uses sidecar proxy (Envoy) injected into each pod.
+
+
+================================================================
+ADVANTAGES & DISADVANTAGES
+================================================================
+
+ADVANTAGES:
+  - Independent deployment of each service.
+  - Technology heterogeneity (different language/DB per service).
+  - Fault isolation — one service failure doesn't crash all.
+  - Horizontal scaling of individual services.
+  - Smaller codebases — easier to understand and maintain.
+  - Faster release cycles.
+  - Teams can work independently (Conway's Law alignment).
+
+DISADVANTAGES:
+  - Increased operational complexity.
+  - Network latency between services.
+  - Distributed transactions are complex (no ACID across services).
+  - Debugging and tracing across services is harder.
+  - Data consistency is eventual (not strong).
+  - More infrastructure needed (service mesh, registry, gateway).
+  - Testing is more complex (contract testing needed).
+
+
+================================================================
+MICROSERVICES INTERVIEW QUICK REFERENCE
+================================================================
+
+Q: What is the difference between Monolithic and Microservices?
+A: Monolithic is one deployable unit with a shared database.
+   Microservices splits the app into small independent services
+   each with its own database and deployment lifecycle.
+
+Q: What is an API Gateway?
+A: A single entry point for clients. Handles routing, auth,
+   rate limiting, and load balancing. Hides internal topology.
+
+Q: What is Service Discovery?
+A: Mechanism for services to find each other dynamically.
+   Eureka allows services to register and look up others
+   without hardcoded URLs.
+
+Q: What is a Circuit Breaker?
+A: Prevents cascading failures. When error rate exceeds
+   threshold, circuit OPENS and requests fail fast without
+   calling the failing service. After a wait, goes HALF-OPEN
+   to test recovery.
+
+Q: How do you handle distributed transactions?
+A: Using the SAGA pattern — each service does its local
+   transaction and publishes an event. If a step fails,
+   compensating transactions undo previous steps.
+
+Q: What is CQRS?
+A: Command Query Responsibility Segregation — separates the
+   read model from the write model for better scalability.
+
+Q: What is the Outbox Pattern?
+A: Ensures atomicity between DB write and event publish by
+   writing both to the DB in one transaction. A poller then
+   reads the outbox and publishes the event to the broker.
+
+Q: How is security handled in microservices?
+A: JWT tokens issued by Auth Service, validated at API Gateway
+   or each service. OAuth2/OIDC for federated identity.
+   mTLS for service-to-service trust.
+
+Q: What is the difference between Choreography and Orchestration?
+A: Choreography: services react to events independently (no
+   central controller). Orchestration: a central saga
+   orchestrator tells each service what to do.
+
+Q: What tools are used for observability?
+A: Distributed tracing: Zipkin / Jaeger.
+   Metrics: Prometheus + Grafana.
+   Logging: ELK Stack (Elasticsearch, Logstash, Kibana).
+   Spring Boot Actuator for health and metrics endpoints.
+
+================================================================

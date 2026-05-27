@@ -1,0 +1,94 @@
+================================================================
+          JAVA EXCEPTION HANDLING - NOTES
+================================================================
+
+1. WHAT IS AN EXCEPTION?
+   - An exception is an unwanted or unexpected event that disrupts
+     the normal flow of a program at runtime.
+   - Examples: dividing by zero, null pointer access, file not found.
+
+----------------------------------------------------------------
+
+2. EXCEPTION HIERARCHY
+   Throwable
+   ├── Error          (serious problems, don't handle these)
+   │     e.g. OutOfMemoryError, StackOverflowError
+   └── Exception
+         ├── Checked Exceptions   (must be handled or declared)
+         │     e.g. IOException, SQLException
+         └── Unchecked Exceptions (RuntimeException subclasses)
+               e.g. NullPointerException, ArithmeticException,
+                    ArrayIndexOutOfBoundsException
+
+----------------------------------------------------------------
+
+3. KEY KEYWORDS
+   - try      : block of code that might throw an exception
+   - catch    : handles the exception
+   - finally  : always executes (cleanup code goes here)
+   - throw    : manually throw an exception
+   - throws   : declares that a method may throw an exception
+
+----------------------------------------------------------------
+
+4. SYNTAX
+
+   try {
+       // risky code
+   } catch (ExceptionType e) {
+       // handle exception
+   } finally {
+       // always runs
+   }
+
+----------------------------------------------------------------
+
+5. MULTIPLE CATCH BLOCKS
+   - You can have multiple catch blocks for different exceptions.
+   - More specific exceptions must come before general ones.
+
+   try { ... }
+   catch (NullPointerException e) { ... }
+   catch (Exception e) { ... }  // general must be last
+
+----------------------------------------------------------------
+
+6. CUSTOM EXCEPTIONS
+   - Extend Exception (checked) or RuntimeException (unchecked).
+
+   class MyException extends Exception {
+       public MyException(String message) {
+           super(message);
+       }
+   }
+
+   throw new MyException("Custom error occurred");
+
+----------------------------------------------------------------
+
+7. CHECKED vs UNCHECKED EXCEPTIONS
+   - Checked   : Compiler forces you to handle them (try-catch or throws).
+   - Unchecked : RuntimeExceptions, no forced handling.
+
+----------------------------------------------------------------
+
+8. BEST PRACTICES
+   - Never swallow exceptions silently (empty catch block).
+   - Always log or print exception details.
+   - Use specific exception types in catch, not just Exception.
+   - Use finally or try-with-resources for closing resources.
+   - Create custom exceptions for meaningful error messages.
+
+----------------------------------------------------------------
+
+9. TRY-WITH-RESOURCES (Java 7+)
+   - Automatically closes resources (like files, DB connections).
+
+   try (FileReader fr = new FileReader("file.txt")) {
+       // use fr
+   } catch (IOException e) {
+       e.printStackTrace();
+   }
+   // fr is closed automatically
+
+================================================================

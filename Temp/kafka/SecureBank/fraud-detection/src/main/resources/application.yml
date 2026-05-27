@@ -1,0 +1,29 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: fraud-detection
+  kafka:
+    bootstrap-servers: localhost:29092
+    streams:
+      application-id: fraud-detection-app
+      properties:
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        processing.guarantee: exactly_once_v2
+        commit.interval.ms: 1000
+        num.stream.threads: 2
+        state.dir: /tmp/kafka-streams/fraud-detection
+
+app:
+  topic:
+    transactions: transactions
+    alerts: alerts
+  fraud:
+    window-seconds: 60
+    threshold: 5
+
+logging:
+  level:
+    com.securebank: INFO
+    org.apache.kafka: WARN

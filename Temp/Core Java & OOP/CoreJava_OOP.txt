@@ -1,0 +1,1020 @@
+================================================================
+              CORE JAVA & OOP — COMPLETE NOTES
+          (Java 8 → Java 21 | Most Probed Topic)
+================================================================
+
+================================================================
+SECTION 1: OOP — FOUR PILLARS
+================================================================
+
+----------------------------------------------------------------
+1. ENCAPSULATION
+----------------------------------------------------------------
+DEFINITION:
+  Bundling data (fields) and methods that operate on that data
+  into a single unit (class), and restricting direct access
+  to internal state using access modifiers.
+
+HOW:
+  - Declare fields as private.
+  - Provide public getter/setter methods.
+  - Validate in setters to protect invariants.
+
+EXAMPLE:
+  public class BankAccount {
+      private double balance;  // hidden
+
+      public double getBalance() { return balance; }
+
+      public void deposit(double amount) {
+          if (amount <= 0) throw new IllegalArgumentException();
+          balance += amount;
+      }
+  }
+
+BENEFITS:
+  - Data hiding (fields not accessible directly).
+  - Controlled access via methods.
+  - Easy to change implementation without affecting clients.
+  - Enables validation before setting values.
+
+ACCESS MODIFIERS:
+  private    : class only
+  (default)  : same package
+  protected  : same package + subclasses
+  public     : everywhere
+
+----------------------------------------------------------------
+2. INHERITANCE
+----------------------------------------------------------------
+DEFINITION:
+  A mechanism where a child class acquires properties and
+  behaviour of a parent class. Promotes code reuse.
+  "IS-A" relationship.
+
+TYPES IN JAVA:
+  Single       : class B extends A
+  Multilevel   : class C extends B extends A
+  Hierarchical : class B extends A, class C extends A
+  Multiple     : NOT supported via classes (use interfaces)
+
+KEYWORDS:
+  extends   : inherit from a class
+  super     : refer to parent class constructor/method
+  final     : prevent inheritance (final class) or override (final method)
+  @Override : annotate overridden methods
+
+EXAMPLE:
+  class Animal {
+      String name;
+      void eat() { System.out.println(name + " eats"); }
+  }
+  class Dog extends Animal {
+      void bark() { System.out.println(name + " barks"); }
+  }
+
+CONSTRUCTOR CHAINING:
+  - super() must be the first statement in constructor.
+  - If not explicitly called, Java inserts super() automatically.
+
+METHOD HIDING vs OVERRIDING:
+  Overriding : instance method in subclass replaces parent's.
+  Hiding     : static method in subclass hides parent's (not polymorphic).
+
+----------------------------------------------------------------
+3. POLYMORPHISM
+----------------------------------------------------------------
+DEFINITION:
+  "Many forms" — same interface/method behaves differently
+  based on the object type.
+
+TYPES:
+  a) Compile-time (Static) Polymorphism — METHOD OVERLOADING
+     Same method name, different parameter list.
+     Resolved at compile time.
+
+     void print(int x)    { }
+     void print(String x) { }
+     void print(int x, int y) { }
+
+  b) Runtime (Dynamic) Polymorphism — METHOD OVERRIDING
+     Subclass provides specific implementation of parent method.
+     Resolved at runtime via dynamic dispatch.
+
+     Animal a = new Dog();  // reference is Animal, object is Dog
+     a.sound();             // calls Dog's sound() at runtime
+
+RULES FOR OVERRIDING:
+  - Same method name and parameters.
+  - Return type must be same or covariant (subtype).
+  - Cannot have more restrictive access modifier.
+  - Cannot override static, final, or private methods.
+  - Can throw unchecked exceptions freely; checked exceptions
+    must be same or narrower than parent's.
+
+OVERLOADING vs OVERRIDING:
+  Feature         | Overloading         | Overriding
+  ----------------|---------------------|----------------------
+  Binding         | Compile-time        | Runtime
+  Parameters      | Must differ         | Must be same
+  Return type     | Can differ          | Same or covariant
+  Access modifier | Can change freely   | Cannot be more restrictive
+  Inheritance     | Same class          | Parent-child required
+  static methods  | Allowed             | Not allowed (hiding)
+
+----------------------------------------------------------------
+4. ABSTRACTION
+----------------------------------------------------------------
+DEFINITION:
+  Hiding implementation details and showing only essential
+  features. Achieved via Abstract Classes and Interfaces.
+
+a) ABSTRACT CLASS:
+  - Can have abstract (no body) and concrete (with body) methods.
+  - Cannot be instantiated directly.
+  - Can have constructors, fields, static methods.
+  - A class can extend only ONE abstract class.
+
+  abstract class Shape {
+      String color;
+      abstract double area();     // must be overridden
+      void display() { System.out.println("Shape: " + color); }
+  }
+
+b) INTERFACE:
+  - All methods public abstract by default (pre-Java 8).
+  - Java 8+: default methods, static methods.
+  - Java 9+: private methods in interfaces.
+  - All fields are public static final.
+  - A class can implement MULTIPLE interfaces.
+
+  interface Drawable {
+      void draw();                         // abstract
+      default void print() { draw(); }    // default (Java 8+)
+      static Drawable circle() { ... }    // static (Java 8+)
+  }
+
+ABSTRACT CLASS vs INTERFACE:
+  Feature              | Abstract Class      | Interface
+  ---------------------|---------------------|--------------------
+  Instantiate          | No                  | No
+  Multiple inheritance | No (single extend)  | Yes (multi-implement)
+  Constructor          | Yes                 | No
+  Fields               | Any type            | public static final only
+  Methods              | abstract + concrete | abstract + default + static
+  Access modifiers     | Any                 | public (default)
+  Use when             | Share code/state    | Define capability/contract
+
+WHEN TO USE WHICH:
+  Abstract class : shared state + partial implementation + IS-A.
+  Interface      : capability contract + multiple inheritance + HAS-A behaviour.
+
+
+================================================================
+SECTION 2: CLASSES & OBJECTS
+================================================================
+
+CLASS ANATOMY:
+  public class Employee {
+      // 1. Fields
+      private Long id;
+      private String name;
+      private static int count = 0;  // class-level
+
+      // 2. Constructor
+      public Employee(Long id, String name) {
+          this.id = id; this.name = name; count++;
+      }
+
+      // 3. Methods
+      public String getName() { return name; }
+
+      // 4. Static methods
+      public static int getCount() { return count; }
+
+      // 5. toString / equals / hashCode
+      @Override public String toString() { return "Employee{id=" + id + "}"; }
+  }
+
+OBJECT CREATION:
+  Employee e = new Employee(1L, "Alice");  // heap allocated
+
+STATIC vs INSTANCE:
+  static  : belongs to class, shared across all objects.
+  instance: belongs to each object, different per object.
+
+FINAL KEYWORD:
+  final variable : cannot be reassigned (value is constant).
+  final method   : cannot be overridden.
+  final class    : cannot be extended.
+  blank final    : final field initialized in constructor.
+
+THIS KEYWORD:
+  - Refers to current instance.
+  - Used to differentiate field vs parameter (same name).
+  - Used in constructor chaining: this(...).
+
+SUPER KEYWORD:
+  - Refers to parent class.
+  - super.method() calls parent's overridden method.
+  - super() calls parent's constructor.
+
+OBJECT CLASS METHODS (every class inherits):
+  toString()    : String representation.
+  equals()      : logical equality (override for value-based).
+  hashCode()    : integer hash (must override with equals()).
+  getClass()    : returns runtime class.
+  clone()       : shallow copy (implement Cloneable).
+
+EQUALS & HASHCODE CONTRACT:
+  - If a.equals(b) is true → a.hashCode() == b.hashCode().
+  - If hashCodes differ → objects are not equal.
+  - Symmetric: a.equals(b) == b.equals(a).
+  - Transitive: if a==b and b==c then a==c.
+  - Consistent: multiple calls return same result.
+
+
+================================================================
+SECTION 3: MUTABILITY vs IMMUTABILITY
+================================================================
+
+MUTABLE OBJECT:
+  - State can be changed after creation.
+  - Example: StringBuilder, ArrayList, HashMap.
+
+  StringBuilder sb = new StringBuilder("Hello");
+  sb.append(" World");  // modifies same object
+
+IMMUTABLE OBJECT:
+  - State CANNOT be changed after creation.
+  - Every "modification" creates a new object.
+  - Example: String, Integer, LocalDate, BigDecimal.
+
+  String s = "Hello";
+  s = s + " World";  // creates a NEW String object
+
+HOW TO CREATE AN IMMUTABLE CLASS:
+  1. Declare class as final (prevent subclassing).
+  2. Make all fields private and final.
+  3. No setters.
+  4. Initialize all fields via constructor.
+  5. Deep-copy mutable fields in constructor and getters.
+
+  public final class ImmutablePoint {
+      private final int x;
+      private final int y;
+
+      public ImmutablePoint(int x, int y) {
+          this.x = x; this.y = y;
+      }
+
+      public int getX() { return x; }
+      public int getY() { return y; }
+
+      public ImmutablePoint translate(int dx, int dy) {
+          return new ImmutablePoint(x + dx, y + dy); // new object
+      }
+  }
+
+  // Immutable with mutable field — deep copy needed:
+  public final class ImmutablePerson {
+      private final String name;
+      private final List<String> hobbies;
+
+      public ImmutablePerson(String name, List<String> hobbies) {
+          this.name    = name;
+          this.hobbies = List.copyOf(hobbies); // defensive copy
+      }
+
+      public List<String> getHobbies() {
+          return Collections.unmodifiableList(hobbies); // defensive copy
+      }
+  }
+
+BENEFITS OF IMMUTABILITY:
+  - Thread-safe by default (no synchronization needed).
+  - Can be freely shared and cached.
+  - Predictable — no surprise state changes.
+  - Safe as HashMap keys or Set elements.
+  - Easier to reason about and test.
+
+STRING IMMUTABILITY:
+  - String literals are stored in String Pool (heap).
+  - Same literal reused: "hello" == "hello" is true.
+  - new String("hello") creates a new object every time.
+  - String.intern() adds to pool.
+
+MUTABILITY COMPARISON:
+  Mutable                | Immutable
+  -----------------------|------------------------
+  String                 | StringBuilder, StringBuffer
+  Integer, Long, etc.    | AtomicInteger, AtomicLong
+  LocalDate              | java.util.Date
+  List.of()              | ArrayList
+  Map.of()               | HashMap
+
+
+================================================================
+SECTION 4: JAVA 8+ FEATURES
+================================================================
+
+----------------------------------------------------------------
+A. LAMBDA EXPRESSIONS
+----------------------------------------------------------------
+DEFINITION:
+  An anonymous function — a concise way to represent a
+  functional interface implementation.
+
+SYNTAX:
+  (parameters) -> expression
+  (parameters) -> { statements; return value; }
+
+EXAMPLES:
+  // No parameter
+  Runnable r = () -> System.out.println("Hello");
+
+  // One parameter (parentheses optional)
+  Consumer<String> print = s -> System.out.println(s);
+
+  // Two parameters
+  Comparator<Integer> comp = (a, b) -> a - b;
+
+  // Multiple statements
+  Function<String, Integer> parse = s -> {
+      int result = Integer.parseInt(s);
+      return result * 2;
+  };
+
+METHOD REFERENCES:
+  Type                  | Syntax              | Example
+  ----------------------|---------------------|---------------------------
+  Static method         | Class::method       | Integer::parseInt
+  Instance method (obj) | obj::method         | "hello"::toUpperCase
+  Instance method (any) | Class::method       | String::toUpperCase
+  Constructor           | Class::new          | ArrayList::new
+
+  // Equivalent:
+  list.forEach(s -> System.out.println(s));
+  list.forEach(System.out::println);
+
+  names.stream().map(s -> s.toUpperCase());
+  names.stream().map(String::toUpperCase);
+
+----------------------------------------------------------------
+B. FUNCTIONAL INTERFACES
+----------------------------------------------------------------
+DEFINITION:
+  An interface with exactly ONE abstract method.
+  Can be used as lambda target.
+  Annotated with @FunctionalInterface (optional but recommended).
+
+BUILT-IN FUNCTIONAL INTERFACES (java.util.function):
+
+  Interface           | Method         | Input  | Output  | Use
+  --------------------|----------------|--------|---------|--------------------
+  Function<T,R>       | R apply(T t)   | T      | R       | Transform T to R
+  BiFunction<T,U,R>   | R apply(T,U)   | T,U    | R       | Transform two inputs
+  Consumer<T>         | void accept(T) | T      | void    | Consume a value
+  BiConsumer<T,U>     | void accept(T,U)| T,U   | void    | Consume two values
+  Supplier<T>         | T get()        | none   | T       | Produce a value
+  Predicate<T>        | boolean test(T)| T      | boolean | Test a condition
+  BiPredicate<T,U>    | boolean test(T,U)| T,U  | boolean | Test two inputs
+  UnaryOperator<T>    | T apply(T)     | T      | T       | Transform same type
+  BinaryOperator<T>   | T apply(T,T)   | T,T    | T       | Combine two same type
+  Runnable            | void run()     | none   | void    | Run with no args
+
+EXAMPLES:
+  Function<String, Integer>  len     = String::length;
+  Predicate<Integer>         isEven  = n -> n % 2 == 0;
+  Consumer<String>           printer = System.out::println;
+  Supplier<List<String>>     listGen = ArrayList::new;
+  UnaryOperator<String>      upper   = String::toUpperCase;
+  BinaryOperator<Integer>    sum     = Integer::sum;
+
+COMPOSING FUNCTIONS:
+  Function<Integer, Integer> times2  = x -> x * 2;
+  Function<Integer, Integer> plus3   = x -> x + 3;
+
+  Function<Integer, Integer> times2ThenPlus3 = times2.andThen(plus3);
+  Function<Integer, Integer> plus3ThenTimes2 = times2.compose(plus3);
+
+COMPOSING PREDICATES:
+  Predicate<Integer> isEven    = n -> n % 2 == 0;
+  Predicate<Integer> isPositive= n -> n > 0;
+
+  Predicate<Integer> isEvenAndPositive = isEven.and(isPositive);
+  Predicate<Integer> isEvenOrPositive  = isEven.or(isPositive);
+  Predicate<Integer> isOdd             = isEven.negate();
+
+----------------------------------------------------------------
+C. STREAMS API
+----------------------------------------------------------------
+DEFINITION:
+  A sequence of elements supporting sequential and parallel
+  aggregate operations. Does NOT modify the source.
+
+STREAM PIPELINE:
+  Source → Intermediate Operations (lazy) → Terminal Operation (eager)
+
+CREATING STREAMS:
+  Stream.of("a", "b", "c")
+  list.stream()
+  array.stream()              // Arrays.stream(arr)
+  Stream.empty()
+  Stream.generate(() -> 1)   // infinite
+  Stream.iterate(0, n -> n + 2)  // infinite
+  IntStream.range(0, 10)
+  IntStream.rangeClosed(1, 10)
+  Files.lines(path)
+
+INTERMEDIATE OPERATIONS (return Stream — lazy):
+  filter(Predicate)           keep elements matching condition
+  map(Function)               transform each element
+  flatMap(Function)           flatten nested streams
+  distinct()                  remove duplicates
+  sorted()                    sort natural order
+  sorted(Comparator)          sort with comparator
+  limit(n)                    take first n elements
+  skip(n)                     skip first n elements
+  peek(Consumer)              debug — inspect elements
+  mapToInt / mapToLong / mapToDouble  → primitive streams
+
+TERMINAL OPERATIONS (return result — trigger execution):
+  forEach(Consumer)           iterate elements
+  collect(Collector)          accumulate into collection
+  toList()                    Java 16+ shorthand for collect(toList())
+  count()                     count elements
+  findFirst()                 first element (Optional)
+  findAny()                   any element (Optional)
+  anyMatch(Predicate)         any element matches
+  allMatch(Predicate)         all elements match
+  noneMatch(Predicate)        no element matches
+  min(Comparator)             minimum element (Optional)
+  max(Comparator)             maximum element (Optional)
+  reduce(identity, BinaryOp)  combine all elements
+  toArray()                   convert to array
+
+COLLECTORS:
+  Collectors.toList()
+  Collectors.toSet()
+  Collectors.toMap(keyFn, valueFn)
+  Collectors.joining(", ")
+  Collectors.joining(", ", "[", "]")
+  Collectors.groupingBy(classifier)
+  Collectors.groupingBy(classifier, downstream)
+  Collectors.partitioningBy(predicate)
+  Collectors.counting()
+  Collectors.summingInt(fn)
+  Collectors.averagingInt(fn)
+  Collectors.summarizingInt(fn)   // count, sum, min, max, avg
+  Collectors.toUnmodifiableList()
+
+STREAM EXAMPLES:
+  // Filter, map, collect
+  List<String> result = people.stream()
+      .filter(p -> p.getAge() >= 18)
+      .map(Person::getName)
+      .sorted()
+      .collect(Collectors.toList());
+
+  // Group by department
+  Map<String, List<Employee>> byDept = employees.stream()
+      .collect(Collectors.groupingBy(Employee::getDepartment));
+
+  // Average salary per department
+  Map<String, Double> avgSalary = employees.stream()
+      .collect(Collectors.groupingBy(
+          Employee::getDepartment,
+          Collectors.averagingDouble(Employee::getSalary)));
+
+  // Flat map
+  List<String> words = sentences.stream()
+      .flatMap(s -> Arrays.stream(s.split(" ")))
+      .collect(Collectors.toList());
+
+  // Reduce
+  int sum = IntStream.rangeClosed(1, 100).sum();  // 5050
+  Optional<Integer> product = Stream.of(1,2,3,4)
+      .reduce((a, b) -> a * b);  // 24
+
+PARALLEL STREAMS:
+  list.parallelStream()
+  stream.parallel()
+
+  NOTE: Parallel streams split work across ForkJoinPool threads.
+  Use when: large data + CPU-intensive + stateless operations.
+  Avoid when: small data, I/O-bound, ordered output needed.
+
+STREAM vs COLLECTION:
+  Collection : stores data, can be iterated multiple times.
+  Stream     : processes data, consumed ONCE, lazy evaluation.
+
+----------------------------------------------------------------
+D. OPTIONAL
+----------------------------------------------------------------
+DEFINITION:
+  A container that may or may not hold a non-null value.
+  Avoids NullPointerException by making nullability explicit.
+
+CREATING OPTIONAL:
+  Optional.of(value)          // throws NPE if null
+  Optional.ofNullable(value)  // null -> empty Optional
+  Optional.empty()            // explicitly empty
+
+CHECKING VALUE:
+  opt.isPresent()             // true if value present
+  opt.isEmpty()               // true if empty (Java 11+)
+
+GETTING VALUE:
+  opt.get()                   // throws if empty — use carefully
+  opt.orElse(default)         // return value or default
+  opt.orElseGet(Supplier)     // return value or supplier result
+  opt.orElseThrow()           // throw NoSuchElementException if empty
+  opt.orElseThrow(Supplier)   // throw custom exception if empty
+
+TRANSFORMING:
+  opt.map(Function)           // transform if present
+  opt.flatMap(Function)       // transform if present (unwrap Optional)
+  opt.filter(Predicate)       // keep value if predicate passes
+
+CONSUMING:
+  opt.ifPresent(Consumer)     // run if present
+  opt.ifPresentOrElse(Consumer, Runnable)  // Java 9+
+
+CHAINING:
+  opt.or(Supplier<Optional>)  // fallback to another Optional (Java 9+)
+  opt.stream()                // stream of 0 or 1 element (Java 9+)
+
+GOOD PRACTICES:
+  - Use as method return type (NOT as field or parameter).
+  - Don't use Optional.get() without checking isPresent().
+  - Prefer orElse / orElseThrow over get().
+  - Don't use Optional<Collection> — return empty collection instead.
+
+EXAMPLE:
+  public Optional<User> findById(Long id) {
+      return userRepository.findById(id);
+  }
+
+  // Usage
+  String name = findById(1L)
+      .map(User::getName)
+      .map(String::toUpperCase)
+      .filter(n -> n.length() > 3)
+      .orElse("UNKNOWN");
+
+
+================================================================
+SECTION 5: JAVA 9, 10, 11 FEATURES
+================================================================
+
+JAVA 9:
+  - Module System (JPMS): module-info.java
+  - Private interface methods
+  - Collection factory methods:
+      List.of(1, 2, 3)
+      Set.of("a", "b")
+      Map.of("k1", "v1", "k2", "v2")
+      Map.ofEntries(entry("k","v"))
+  - Stream enhancements:
+      stream.takeWhile(predicate)   // take while condition true
+      stream.dropWhile(predicate)   // drop while condition true
+      Stream.iterate(seed, hasNext, next)
+      Stream.ofNullable(value)      // empty if null
+  - Optional enhancements: ifPresentOrElse(), or(), stream()
+  - String methods in Java 11:
+      isBlank(), lines(), strip(), repeat(n)
+
+JAVA 10:
+  - Local Variable Type Inference: var keyword
+      var list = new ArrayList<String>();
+      var map  = new HashMap<String, Integer>();
+
+JAVA 11:
+  - var in lambda parameters: (var x, var y) -> x + y
+  - String methods: isBlank(), lines(), strip(), stripLeading(),
+                    stripTrailing(), repeat(n)
+  - Files.readString(), Files.writeString()
+  - Collection.toArray(IntFunction)
+  - Predicate.not(): Predicate.not(String::isBlank)
+
+
+================================================================
+SECTION 6: JAVA 14, 15, 16 FEATURES
+================================================================
+
+JAVA 14 — SWITCH EXPRESSIONS (standard):
+  // Old switch statement
+  int result;
+  switch (day) {
+      case MON: result = 1; break;
+      case TUE: result = 2; break;
+      default:  result = 0;
+  }
+
+  // New switch expression (Java 14+)
+  int result = switch (day) {
+      case MON -> 1;
+      case TUE -> 2;
+      case WED, THU -> 3;
+      default -> 0;
+  };
+
+  // With yield (multi-line)
+  int result = switch (day) {
+      case MON -> 1;
+      default -> {
+          System.out.println("Other day");
+          yield 0;
+      }
+  };
+
+JAVA 14 — HELPFUL NULLPOINTEREXCEPTIONS:
+  - JVM now explains which variable was null.
+
+JAVA 16 — RECORDS (standard):
+  record Point(int x, int y) {}
+  // Auto-generates: constructor, getters (x(), y()),
+  //                 equals(), hashCode(), toString()
+
+  Point p = new Point(3, 4);
+  System.out.println(p.x());     // 3
+  System.out.println(p);         // Point[x=3, y=4]
+
+  // Compact constructor (validate)
+  record Range(int min, int max) {
+      Range {
+          if (min > max) throw new IllegalArgumentException();
+      }
+  }
+
+JAVA 16 — INSTANCEOF PATTERN MATCHING:
+  // Old way
+  if (obj instanceof String) {
+      String s = (String) obj;
+      System.out.println(s.length());
+  }
+
+  // New way (Java 16+)
+  if (obj instanceof String s) {
+      System.out.println(s.length());  // s is already cast
+  }
+
+  // With condition
+  if (obj instanceof String s && s.length() > 5) {
+      System.out.println(s.toUpperCase());
+  }
+
+
+================================================================
+SECTION 7: JAVA 17 FEATURES (LTS)
+================================================================
+
+SEALED CLASSES (Java 17 — standard):
+  - Restricts which classes can extend/implement a class.
+  - Subclasses must be: final, sealed, or non-sealed.
+
+  public sealed class Shape
+      permits Circle, Rectangle, Triangle {}
+
+  public final class Circle extends Shape {
+      double radius;
+  }
+  public final class Rectangle extends Shape {
+      double width, height;
+  }
+  public non-sealed class Triangle extends Shape {
+      // can be extended freely
+  }
+
+  BENEFIT: Compiler knows all possible subtypes → exhaustive
+           switch/pattern matching without default case.
+
+TEXT BLOCKS (Java 15 — standard in Java 17):
+  String json = """
+          {
+              "name": "Alice",
+              "age": 30,
+              "city": "New York"
+          }
+          """;
+
+  String html = """
+          <html>
+              <body>Hello</body>
+          </html>
+          """;
+
+  // Incidental whitespace stripped based on closing """
+  // String methods: formatted(), stripIndent(), translateEscapes()
+
+PATTERN MATCHING FOR SWITCH (preview in 17, standard in 21):
+  static String format(Object obj) {
+      return switch (obj) {
+          case Integer i -> "int: " + i;
+          case Long l    -> "long: " + l;
+          case String s  -> "string: " + s;
+          case null      -> "null";
+          default        -> "other: " + obj;
+      };
+  }
+
+
+================================================================
+SECTION 8: JAVA 21 FEATURES (LTS)
+================================================================
+
+VIRTUAL THREADS (Project Loom):
+  - Lightweight threads managed by JVM (not OS threads).
+  - Millions of virtual threads possible.
+  - Ideal for I/O-bound, blocking tasks.
+
+  Thread.ofVirtual().start(() -> System.out.println("Virtual!"));
+
+  try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      executor.submit(() -> fetchFromDB());
+      executor.submit(() -> callExternalAPI());
+  }
+
+  BENEFIT: Same blocking code style, scalability of async.
+  USE CASE: Web servers, microservices, high-concurrency I/O.
+
+SEQUENCED COLLECTIONS (Java 21):
+  - New interfaces: SequencedCollection, SequencedSet, SequencedMap.
+  - Access first/last element uniformly.
+
+  list.getFirst();   list.getLast();
+  list.addFirst(e);  list.addLast(e);
+  list.removeFirst(); list.removeLast();
+  list.reversed();   // reversed view
+
+RECORD PATTERNS (Java 21 — standard):
+  if (obj instanceof Point(int x, int y)) {
+      System.out.println("x=" + x + " y=" + y);
+  }
+
+  switch (shape) {
+      case Circle(double r) -> Math.PI * r * r;
+      case Rectangle(double w, double h) -> w * h;
+  }
+
+PATTERN MATCHING FOR SWITCH (Java 21 — standard):
+  static double area(Shape s) {
+      return switch (s) {
+          case Circle c       -> Math.PI * c.radius() * c.radius();
+          case Rectangle r    -> r.width() * r.height();
+          case Triangle t     -> 0.5 * t.base() * t.height();
+      };
+  }
+
+UNNAMED PATTERNS AND VARIABLES (Java 21 preview):
+  switch (obj) {
+      case Integer _  -> "it's an int";   // _ = unused
+      case String _   -> "it's a String";
+      default         -> "other";
+  }
+
+STRING TEMPLATES (Java 21 preview):
+  String name = "Alice";
+  String msg  = STR."Hello, \{name}! Age: \{30 + 1}";
+  // "Hello, Alice! Age: 31"
+
+
+================================================================
+SECTION 9: VAR — LOCAL VARIABLE TYPE INFERENCE (Java 10+)
+================================================================
+
+  var list    = new ArrayList<String>();    // ArrayList<String>
+  var map     = new HashMap<String, int[]>();
+  var entries = map.entrySet();
+  var number  = 42;                         // int
+
+  // In for-each
+  for (var entry : map.entrySet()) { ... }
+
+  // In try-with-resources
+  try (var stream = Files.lines(path)) { ... }
+
+RULES:
+  - Only for local variables (not fields, params, return types).
+  - Must be initialized at declaration.
+  - Cannot be null (type cannot be inferred).
+  - Cannot be used with array initializers: var arr = {1,2,3};  // ERROR
+  - Inferred type is fixed (still statically typed).
+
+
+================================================================
+SECTION 10: GENERICS
+================================================================
+
+GENERIC CLASS:
+  public class Box<T> {
+      private T value;
+      Box(T value) { this.value = value; }
+      T get()      { return value; }
+  }
+
+  Box<String> box = new Box<>("Hello");
+
+BOUNDED TYPE PARAMETERS:
+  <T extends Number>          T must be Number or subtype
+  <T extends Comparable<T>>   T must implement Comparable
+  <T extends A & B & C>       T must extend A and implement B, C
+
+WILDCARDS:
+  List<?>               unknown type (read-only)
+  List<? extends Number> Number or subtype (producer — read)
+  List<? super Integer>  Integer or supertype (consumer — write)
+
+PECS: Producer Extends, Consumer Super
+  void copy(List<? extends T> src, List<? super T> dst) {
+      dst.addAll(src);
+  }
+
+TYPE ERASURE:
+  Generics exist at compile time only.
+  At runtime List<String> and List<Integer> are both just List.
+  Cannot do: new T(), T.class, instanceof List<String>.
+
+
+================================================================
+SECTION 11: EXCEPTION HANDLING
+================================================================
+
+HIERARCHY:
+  Throwable
+    ├── Error           (JVM errors — don't catch)
+    │     ├── OutOfMemoryError
+    │     └── StackOverflowError
+    └── Exception
+          ├── RuntimeException (Unchecked — compiler doesn't enforce)
+          │     ├── NullPointerException
+          │     ├── IllegalArgumentException
+          │     ├── ArrayIndexOutOfBoundsException
+          │     └── ClassCastException
+          └── Checked Exception (compiler enforces try-catch/throws)
+                ├── IOException
+                ├── SQLException
+                └── FileNotFoundException
+
+CHECKED vs UNCHECKED:
+  Checked   : Must be handled (try-catch or throws). Compile error if not.
+  Unchecked : RuntimeException — no obligation to handle.
+
+MULTI-CATCH (Java 7+):
+  try { ... }
+  catch (IOException | SQLException ex) { ... }
+
+TRY-WITH-RESOURCES (Java 7+):
+  try (Connection c = ds.getConnection();
+       Statement  s = c.createStatement()) {
+      // auto-closed even if exception thrown
+  }
+
+CUSTOM EXCEPTION:
+  public class OrderNotFoundException extends RuntimeException {
+      private final Long orderId;
+
+      public OrderNotFoundException(Long orderId) {
+          super("Order not found: " + orderId);
+          this.orderId = orderId;
+      }
+      public Long getOrderId() { return orderId; }
+  }
+
+BEST PRACTICES:
+  - Catch specific exceptions, not Exception or Throwable.
+  - Never swallow exceptions silently (empty catch block).
+  - Use finally for cleanup (or try-with-resources).
+  - Don't use exceptions for flow control.
+  - Add meaningful messages to exceptions.
+  - Preserve original exception when wrapping: new AppEx(cause).
+
+
+================================================================
+SECTION 12: COLLECTIONS — QUICK REFERENCE
+================================================================
+(See full Collection Framework notes for deep dive)
+
+  Interface  | Impl              | Order          | Null | Thread-safe
+  -----------|-------------------|----------------|------|------------
+  List       | ArrayList         | Insertion       | Yes  | No
+  List       | LinkedList        | Insertion       | Yes  | No
+  Set        | HashSet           | None            | One  | No
+  Set        | LinkedHashSet     | Insertion       | One  | No
+  Set        | TreeSet           | Sorted          | No   | No
+  Map        | HashMap           | None            | Yes  | No
+  Map        | LinkedHashMap     | Insertion       | Yes  | No
+  Map        | TreeMap           | Sorted key      | No   | No
+  Queue      | PriorityQueue     | Priority        | No   | No
+  Deque      | ArrayDeque        | LIFO/FIFO       | No   | No
+
+
+================================================================
+SECTION 13: STRINGS IN JAVA
+================================================================
+
+IMMUTABILITY: String is immutable.
+STRING POOL : Literals stored in pool, reused for same value.
+
+STRING METHODS:
+  charAt(i)           length()           substring(from, to)
+  indexOf(s)          lastIndexOf(s)     contains(s)
+  startsWith(s)       endsWith(s)        matches(regex)
+  replace(old, new)   replaceAll(regex)  split(regex)
+  trim()              strip() (Java11)   toUpperCase()
+  toLowerCase()       isEmpty()          isBlank() (Java11)
+  equals()            equalsIgnoreCase() compareTo()
+  valueOf(x)          format()           join(delim, parts)
+  chars()             codePoints()       repeat(n) (Java11)
+  lines()             stripLeading()     stripTrailing()
+
+STRING vs STRINGBUILDER vs STRINGBUFFER:
+  String       : Immutable. Thread-safe. Use for literals.
+  StringBuilder: Mutable. Not thread-safe. Use in single thread.
+  StringBuffer : Mutable. Thread-safe (synchronized). Legacy.
+
+String Comparison:
+  == compares references (address).
+  .equals() compares content. Use this!
+  .equalsIgnoreCase() — case-insensitive comparison.
+
+String.format() vs Text Blocks vs String Templates:
+  String.format("Hello %s, age %d", name, age)
+  "Hello " + name + ", age " + age  // inefficient
+  """                               // text block (Java 15+)
+  Hello %s
+  """.formatted(name)
+  STR."Hello \{name}"              // template (Java 21 preview)
+
+
+================================================================
+SECTION 14: INTERVIEW QUICK REFERENCE
+================================================================
+
+Q: What are the 4 pillars of OOP?
+A: Encapsulation, Inheritance, Polymorphism, Abstraction.
+
+Q: Difference between abstract class and interface?
+A: Abstract class can have state, constructors, any method type,
+   single inheritance. Interface is a pure contract, supports
+   multiple inheritance, no state (pre-Java 8), default/static
+   methods (Java 8+).
+
+Q: What is method overloading vs overriding?
+A: Overloading = same name, different params, compile-time.
+   Overriding = redefine parent method, runtime polymorphism.
+
+Q: What is the difference between == and .equals()?
+A: == compares references (memory address).
+   .equals() compares content/value. Always use .equals() for Strings.
+
+Q: Why is String immutable?
+A: Security (class loading, network), String pool efficiency,
+   thread safety, hashCode caching.
+
+Q: What is the purpose of hashCode() contract?
+A: If a.equals(b) then a.hashCode() == b.hashCode().
+   Needed for correct HashMap/HashSet behaviour.
+
+Q: What is a functional interface?
+A: Interface with exactly one abstract method. Target for lambdas.
+
+Q: What is the difference between map() and flatMap()?
+A: map() transforms each element 1-to-1.
+   flatMap() transforms and flattens nested streams.
+
+Q: What is Optional and why use it?
+A: Container for nullable value. Avoids NPE. Makes nullability
+   explicit. Use as return type, not as field/parameter.
+
+Q: What are virtual threads (Java 21)?
+A: Lightweight JVM-managed threads. Millions can run concurrently.
+   Same blocking style, high scalability for I/O tasks.
+
+Q: What is a sealed class?
+A: Class that restricts which classes can extend it. Enables
+   exhaustive pattern matching. Declared with sealed + permits.
+
+Q: What is a record in Java?
+A: Concise class for immutable data. Auto-generates constructor,
+   getters, equals, hashCode, toString. Declared with record keyword.
+
+Q: What is the difference between Comparable and Comparator?
+A: Comparable: natural ordering in the class (compareTo).
+   Comparator: external ordering, multiple orderings, lambda-friendly.
+
+Q: What is var in Java 10?
+A: Local variable type inference. Compiler infers type from RHS.
+   Still statically typed. Only for local variables.
+
+Q: What are the differences between Stream and Collection?
+A: Collection stores data, can be iterated many times, eager.
+   Stream processes data, consumed once, lazy, no storage.
+
+Q: What is PECS in generics?
+A: Producer Extends, Consumer Super.
+   Use <? extends T> when reading (get).
+   Use <? super T> when writing (put).
+
+================================================================

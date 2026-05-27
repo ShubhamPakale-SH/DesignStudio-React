@@ -1,0 +1,828 @@
+================================================================
+                    DESIGN PATTERNS
+================================================================
+
+WHAT ARE DESIGN PATTERNS?
+--------------------------
+Design Patterns are reusable solutions to commonly occurring
+problems in software design. They are not code — they are
+templates or blueprints that guide how to structure code.
+
+Introduced by the "Gang of Four" (GoF) — Erich Gamma,
+Richard Helm, Ralph Johnson, John Vlissides — in their book
+"Design Patterns: Elements of Reusable Object-Oriented Software"
+(1994).
+
+Design patterns are categorized into 3 types:
+  1. Creational  — how objects are created
+  2. Structural  — how objects are composed/structured
+  3. Behavioral  — how objects communicate/interact
+
+
+================================================================
+CATEGORY 1: CREATIONAL PATTERNS
+================================================================
+Deal with object creation mechanisms. Aim to create objects
+in a manner suitable to the situation.
+
+----------------------------------------------------------------
+1. SINGLETON PATTERN
+----------------------------------------------------------------
+INTENT:
+  Ensures a class has only ONE instance and provides a
+  global access point to it.
+
+WHEN TO USE:
+  - Database connection pool
+  - Logger
+  - Configuration manager
+  - Thread pool
+  - Cache
+
+STRUCTURE:
+  class Singleton {
+      private static Singleton instance;
+      private Singleton() {}  // private constructor
+      public static Singleton getInstance() {
+          if (instance == null) instance = new Singleton();
+          return instance;
+      }
+  }
+
+THREAD-SAFE (Double-Checked Locking):
+  private static volatile Singleton instance;
+  public static Singleton getInstance() {
+      if (instance == null) {
+          synchronized (Singleton.class) {
+              if (instance == null)
+                  instance = new Singleton();
+          }
+      }
+      return instance;
+  }
+
+REAL WORLD: Spring beans (default scope = singleton),
+            Logger.getLogger(), Runtime.getRuntime()
+
+----------------------------------------------------------------
+2. FACTORY METHOD PATTERN
+----------------------------------------------------------------
+INTENT:
+  Defines an interface for creating objects but lets
+  subclasses decide which class to instantiate.
+
+WHEN TO USE:
+  - When the exact type of object isn't known until runtime.
+  - When subclasses should control what gets created.
+
+STRUCTURE:
+  interface Animal { void speak(); }
+  class Dog implements Animal { void speak() { "Woof"; } }
+  class Cat implements Animal { void speak() { "Meow"; } }
+
+  abstract class AnimalFactory {
+      abstract Animal createAnimal();  // factory method
+  }
+  class DogFactory extends AnimalFactory {
+      Animal createAnimal() { return new Dog(); }
+  }
+
+REAL WORLD: java.util.Calendar.getInstance(),
+            java.text.NumberFormat.getInstance(),
+            Spring BeanFactory
+
+----------------------------------------------------------------
+3. ABSTRACT FACTORY PATTERN
+----------------------------------------------------------------
+INTENT:
+  Provides an interface for creating families of related
+  objects without specifying their concrete classes.
+  "Factory of Factories."
+
+WHEN TO USE:
+  - When system must be independent of how products are created.
+  - UI toolkit (Windows vs Mac widgets)
+  - Cross-platform code
+
+STRUCTURE:
+  interface GUIFactory {
+      Button createButton();
+      Checkbox createCheckbox();
+  }
+  class WindowsFactory implements GUIFactory { ... }
+  class MacFactory    implements GUIFactory { ... }
+
+REAL WORLD: javax.xml.parsers.DocumentBuilderFactory,
+            java.sql.Connection (via DriverManager)
+
+----------------------------------------------------------------
+4. BUILDER PATTERN
+----------------------------------------------------------------
+INTENT:
+  Separates the construction of a complex object from its
+  representation. Builds objects step by step.
+
+WHEN TO USE:
+  - Object has many optional fields.
+  - Constructor has too many parameters (telescoping constructor).
+  - Immutable objects with many fields.
+
+STRUCTURE:
+  class Person {
+      private final String name;
+      private final int age;
+      private final String email;
+
+      private Person(Builder b) {
+          this.name = b.name;
+          this.age  = b.age;
+          this.email = b.email;
+      }
+
+      static class Builder {
+          private String name;
+          private int age;
+          private String email;
+
+          Builder name(String name)   { this.name = name;  return this; }
+          Builder age(int age)        { this.age = age;    return this; }
+          Builder email(String email) { this.email = email; return this; }
+          Person build()              { return new Person(this); }
+      }
+  }
+
+  // Usage
+  Person p = new Person.Builder()
+      .name("Alice").age(30).email("a@b.com").build();
+
+REAL WORLD: StringBuilder, Lombok @Builder,
+            ResponseEntity.ok().body(...),
+            HttpRequest.newBuilder()
+
+----------------------------------------------------------------
+5. PROTOTYPE PATTERN
+----------------------------------------------------------------
+INTENT:
+  Creates new objects by copying (cloning) an existing object
+  (the prototype).
+
+WHEN TO USE:
+  - Object creation is expensive (DB call, network).
+  - Need many similar objects with minor differences.
+
+STRUCTURE:
+  class Shape implements Cloneable {
+      String color;
+      public Shape clone() throws CloneNotSupportedException {
+          return (Shape) super.clone();
+      }
+  }
+
+  Shape original = new Shape();
+  original.color = "Red";
+  Shape copy = original.clone();  // fast copy
+
+SHALLOW vs DEEP CLONE:
+  Shallow: copies primitives + references (not nested objects).
+  Deep   : recursively copies all nested objects.
+
+REAL WORLD: Object.clone(), Spring prototype scope beans,
+            Copy constructors
+
+----------------------------------------------------------------
+6. OBJECT POOL PATTERN
+----------------------------------------------------------------
+INTENT:
+  Reuses a set of pre-initialized objects instead of
+  creating and destroying them on demand.
+
+WHEN TO USE:
+  - Object creation is expensive (DB connections, threads).
+
+REAL WORLD: Database connection pools (HikariCP, c3p0),
+            Thread pools (ExecutorService),
+            String pool in Java
+
+
+================================================================
+CATEGORY 2: STRUCTURAL PATTERNS
+================================================================
+Deal with object composition — creating relationships
+between objects to form larger structures.
+
+----------------------------------------------------------------
+7. ADAPTER PATTERN
+----------------------------------------------------------------
+INTENT:
+  Converts the interface of a class into another interface
+  that clients expect. Makes incompatible interfaces work together.
+  Also called "Wrapper."
+
+WHEN TO USE:
+  - Integrating legacy code with a new system.
+  - Using third-party library with a different interface.
+
+STRUCTURE:
+  interface MediaPlayer { void play(String file); }
+
+  class OldPlayer {
+      void playMp4(String file) { ... }  // old interface
+  }
+
+  class MediaAdapter implements MediaPlayer {
+      OldPlayer oldPlayer = new OldPlayer();
+      public void play(String file) {
+          oldPlayer.playMp4(file);  // adapts old -> new
+      }
+  }
+
+REAL WORLD: java.util.Arrays.asList() (array -> List),
+            InputStreamReader (InputStream -> Reader),
+            Spring MVC HandlerAdapter
+
+----------------------------------------------------------------
+8. BRIDGE PATTERN
+----------------------------------------------------------------
+INTENT:
+  Decouples an abstraction from its implementation so that
+  the two can vary independently.
+
+WHEN TO USE:
+  - Avoid a permanent binding between abstraction and implementation.
+  - Both abstraction and implementation should be extensible.
+
+STRUCTURE:
+  interface Renderer { void renderShape(String shape); }
+  class VectorRenderer implements Renderer { ... }
+  class RasterRenderer implements Renderer { ... }
+
+  abstract class Shape {
+      protected Renderer renderer;
+      Shape(Renderer r) { this.renderer = r; }
+      abstract void draw();
+  }
+  class Circle extends Shape {
+      void draw() { renderer.renderShape("Circle"); }
+  }
+
+REAL WORLD: JDBC (abstraction=Connection, impl=Driver),
+            Java AWT (abstraction=Component, impl=Peer)
+
+----------------------------------------------------------------
+9. COMPOSITE PATTERN
+----------------------------------------------------------------
+INTENT:
+  Composes objects into tree structures to represent
+  part-whole hierarchies. Clients treat individual objects
+  and compositions uniformly.
+
+WHEN TO USE:
+  - File system (files and folders).
+  - UI components (panels containing buttons).
+  - Organization hierarchy.
+
+STRUCTURE:
+  interface Component { void display(); }
+
+  class Leaf implements Component {
+      String name;
+      void display() { print(name); }
+  }
+
+  class Composite implements Component {
+      List<Component> children = new ArrayList<>();
+      void add(Component c)    { children.add(c); }
+      void display() { children.forEach(Component::display); }
+  }
+
+REAL WORLD: java.awt.Container,
+            XML/HTML DOM tree,
+            File system directories
+
+----------------------------------------------------------------
+10. DECORATOR PATTERN
+----------------------------------------------------------------
+INTENT:
+  Attaches additional responsibilities to an object
+  dynamically. Provides a flexible alternative to
+  subclassing for extending functionality.
+
+WHEN TO USE:
+  - Add behaviour to objects without altering their class.
+  - Add/remove responsibilities at runtime.
+
+STRUCTURE:
+  interface Coffee { double getCost(); String getDesc(); }
+
+  class SimpleCoffee implements Coffee {
+      public double getCost() { return 1.0; }
+      public String getDesc() { return "Coffee"; }
+  }
+
+  class MilkDecorator implements Coffee {
+      private Coffee coffee;
+      MilkDecorator(Coffee c) { this.coffee = c; }
+      public double getCost() { return coffee.getCost() + 0.5; }
+      public String getDesc() { return coffee.getDesc() + ", Milk"; }
+  }
+
+  // Usage
+  Coffee c = new MilkDecorator(new SimpleCoffee());
+
+REAL WORLD: java.io (BufferedReader wraps FileReader),
+            Collections.synchronizedList(),
+            Spring Security filter chain
+
+----------------------------------------------------------------
+11. FACADE PATTERN
+----------------------------------------------------------------
+INTENT:
+  Provides a simplified interface to a complex subsystem.
+  Hides the complexity behind a single unified interface.
+
+WHEN TO USE:
+  - Simplify a complex API for the client.
+  - Layered architecture (Service layer is a facade).
+
+STRUCTURE:
+  class OrderFacade {
+      private InventoryService inventory;
+      private PaymentService   payment;
+      private ShippingService  shipping;
+      private EmailService     email;
+
+      public void placeOrder(Order order) {
+          inventory.reserve(order);
+          payment.charge(order);
+          shipping.schedule(order);
+          email.sendConfirmation(order);
+      }
+  }
+  // Client only calls placeOrder() — complexity hidden
+
+REAL WORLD: Spring JdbcTemplate (hides JDBC complexity),
+            SLF4J (facade over Log4j, Logback),
+            javax.faces.context.FacesContext
+
+----------------------------------------------------------------
+12. FLYWEIGHT PATTERN
+----------------------------------------------------------------
+INTENT:
+  Uses sharing to efficiently support a large number of
+  fine-grained objects. Reduces memory usage.
+
+INTRINSIC STATE  : shared, immutable (stored in flyweight).
+EXTRINSIC STATE  : context-specific, passed by client.
+
+WHEN TO USE:
+  - App creates huge numbers of similar objects.
+  - Memory is a concern.
+
+EXAMPLE:
+  Chess game — 32 pieces but only 6 types.
+  Store piece type (color, shape) as flyweight.
+  Store position as extrinsic state per piece.
+
+REAL WORLD: Java String pool (interning),
+            Integer.valueOf(-128 to 127) caching,
+            Font objects in word processors
+
+----------------------------------------------------------------
+13. PROXY PATTERN
+----------------------------------------------------------------
+INTENT:
+  Provides a surrogate or placeholder for another object
+  to control access to it.
+
+TYPES:
+  a) Virtual Proxy    — lazy loading (create on first use)
+  b) Protection Proxy — access control
+  c) Remote Proxy     — represents object in another JVM
+  d) Caching Proxy    — caches results of expensive calls
+  e) Logging Proxy    — logs calls to the real object
+
+STRUCTURE:
+  interface Service { void request(); }
+  class RealService implements Service { void request() { ... } }
+
+  class ProxyService implements Service {
+      private RealService real;
+      public void request() {
+          if (real == null) real = new RealService(); // lazy init
+          log("Before");
+          real.request();
+          log("After");
+      }
+  }
+
+REAL WORLD: Spring AOP (@Transactional, @Cacheable use proxies),
+            Hibernate lazy loading,
+            java.lang.reflect.Proxy (JDK dynamic proxy)
+
+
+================================================================
+CATEGORY 3: BEHAVIORAL PATTERNS
+================================================================
+Deal with algorithms and the assignment of responsibilities
+between objects.
+
+----------------------------------------------------------------
+14. CHAIN OF RESPONSIBILITY PATTERN
+----------------------------------------------------------------
+INTENT:
+  Passes a request along a chain of handlers. Each handler
+  decides to process it or pass it to the next handler.
+
+WHEN TO USE:
+  - More than one handler for a request.
+  - Set of handlers determined at runtime.
+
+STRUCTURE:
+  abstract class Handler {
+      Handler next;
+      void setNext(Handler next) { this.next = next; }
+      abstract void handle(Request r);
+  }
+  class AuthHandler extends Handler {
+      void handle(Request r) {
+          if (!r.isAuthenticated()) throw new Exception("Unauth");
+          else if (next != null) next.handle(r);
+      }
+  }
+
+REAL WORLD: Java Servlet Filters,
+            Spring Security FilterChain,
+            Exception handling (try-catch hierarchy),
+            Logging frameworks (log level hierarchy)
+
+----------------------------------------------------------------
+15. COMMAND PATTERN
+----------------------------------------------------------------
+INTENT:
+  Encapsulates a request as an object, allowing you to
+  parameterize, queue, log, or undo operations.
+
+WHEN TO USE:
+  - Undo/redo operations (text editors).
+  - Transaction logging.
+  - Task queues.
+
+STRUCTURE:
+  interface Command { void execute(); void undo(); }
+
+  class LightOnCommand implements Command {
+      Light light;
+      void execute() { light.on(); }
+      void undo()    { light.off(); }
+  }
+
+  class RemoteControl {
+      Command command;
+      void pressButton()  { command.execute(); }
+      void pressUndo()    { command.undo(); }
+  }
+
+REAL WORLD: java.lang.Runnable (execute()),
+            javax.swing.Action,
+            Transaction management
+
+----------------------------------------------------------------
+16. ITERATOR PATTERN
+----------------------------------------------------------------
+INTENT:
+  Provides a way to sequentially access elements of a
+  collection without exposing its underlying structure.
+
+STRUCTURE:
+  interface Iterator<T> {
+      boolean hasNext();
+      T next();
+  }
+
+REAL WORLD: java.util.Iterator,
+            for-each loop (uses Iterable),
+            All Java Collections
+
+----------------------------------------------------------------
+17. MEDIATOR PATTERN
+----------------------------------------------------------------
+INTENT:
+  Defines an object (mediator) that encapsulates how a set
+  of objects interact. Promotes loose coupling by preventing
+  objects from referring to each other directly.
+
+WHEN TO USE:
+  - Many-to-many communication between objects.
+  - Chat room (users communicate via server/mediator).
+  - Air traffic control (planes communicate via tower).
+
+STRUCTURE:
+  interface Mediator { void send(String msg, Colleague c); }
+  class ChatRoom implements Mediator {
+      List<Colleague> colleagues;
+      void send(String msg, Colleague sender) {
+          colleagues.stream()
+              .filter(c -> c != sender)
+              .forEach(c -> c.receive(msg));
+      }
+  }
+
+REAL WORLD: Spring ApplicationEventPublisher,
+            Message broker (RabbitMQ, Kafka),
+            javax.swing.ButtonGroup
+
+----------------------------------------------------------------
+18. MEMENTO PATTERN
+----------------------------------------------------------------
+INTENT:
+  Captures and externalizes an object's internal state so
+  that the object can be restored to this state later.
+  Without violating encapsulation.
+
+WHEN TO USE:
+  - Undo/redo in text editors.
+  - Game save/load state.
+  - Transaction rollback.
+
+STRUCTURE:
+  class EditorMemento { String content; }
+
+  class Editor {
+      private String content;
+      EditorMemento save()             { return new EditorMemento(content); }
+      void restore(EditorMemento m)    { content = m.content; }
+  }
+
+  class History {
+      Stack<EditorMemento> history = new Stack<>();
+      void push(EditorMemento m) { history.push(m); }
+      EditorMemento pop()        { return history.pop(); }
+  }
+
+REAL WORLD: java.io.Serializable,
+            Browser back button,
+            Database transaction savepoints
+
+----------------------------------------------------------------
+19. OBSERVER PATTERN
+----------------------------------------------------------------
+INTENT:
+  Defines a one-to-many dependency. When one object (Subject)
+  changes state, all dependents (Observers) are notified
+  automatically.
+  Also called Publish-Subscribe.
+
+WHEN TO USE:
+  - Event handling systems.
+  - MVC: Model notifies View of changes.
+  - Stock price updates to multiple displays.
+
+STRUCTURE:
+  interface Observer { void update(String event); }
+
+  class EventSource {
+      List<Observer> observers = new ArrayList<>();
+      void subscribe(Observer o)   { observers.add(o); }
+      void unsubscribe(Observer o) { observers.remove(o); }
+      void notifyAll(String event) {
+          observers.forEach(o -> o.update(event));
+      }
+  }
+
+REAL WORLD: java.util.Observer / Observable (legacy),
+            Spring ApplicationEvent,
+            Kafka consumers,
+            JavaScript addEventListener,
+            JMS listeners
+
+----------------------------------------------------------------
+20. STATE PATTERN
+----------------------------------------------------------------
+INTENT:
+  Allows an object to alter its behaviour when its internal
+  state changes. The object will appear to change its class.
+
+WHEN TO USE:
+  - Object behaviour depends on its state.
+  - Many conditionals based on state (replace with polymorphism).
+  - Vending machine, traffic lights, order lifecycle.
+
+STRUCTURE:
+  interface OrderState { void handle(OrderContext ctx); }
+
+  class CreatedState implements OrderState {
+      void handle(OrderContext ctx) {
+          System.out.println("Order confirmed");
+          ctx.setState(new ConfirmedState());
+      }
+  }
+  class ConfirmedState implements OrderState {
+      void handle(OrderContext ctx) {
+          System.out.println("Order shipped");
+          ctx.setState(new ShippedState());
+      }
+  }
+
+  class OrderContext {
+      private OrderState state = new CreatedState();
+      void setState(OrderState s) { this.state = s; }
+      void next() { state.handle(this); }
+  }
+
+REAL WORLD: TCP connection states,
+            Vending machine states,
+            Order lifecycle (Created→Confirmed→Shipped→Delivered)
+
+----------------------------------------------------------------
+21. STRATEGY PATTERN
+----------------------------------------------------------------
+INTENT:
+  Defines a family of algorithms, encapsulates each one,
+  and makes them interchangeable. Lets the algorithm vary
+  independently from the clients that use it.
+
+WHEN TO USE:
+  - Multiple sorting algorithms.
+  - Multiple payment methods.
+  - Multiple compression algorithms.
+
+STRUCTURE:
+  interface SortStrategy { void sort(int[] arr); }
+  class BubbleSort implements SortStrategy { ... }
+  class QuickSort  implements SortStrategy { ... }
+  class MergeSort  implements SortStrategy { ... }
+
+  class Sorter {
+      private SortStrategy strategy;
+      Sorter(SortStrategy s) { this.strategy = s; }
+      void sort(int[] arr)   { strategy.sort(arr); }
+  }
+
+  // Switch strategy at runtime
+  Sorter s = new Sorter(new QuickSort());
+  s.sort(arr);
+  s = new Sorter(new MergeSort());
+
+REAL WORLD: java.util.Comparator,
+            Collections.sort(list, comparator),
+            Spring Security AuthenticationStrategy,
+            Payment gateways (Stripe, PayPal, UPI)
+
+----------------------------------------------------------------
+22. TEMPLATE METHOD PATTERN
+----------------------------------------------------------------
+INTENT:
+  Defines the skeleton of an algorithm in a base class,
+  deferring some steps to subclasses. Subclasses can redefine
+  certain steps without changing the algorithm's structure.
+
+WHEN TO USE:
+  - Invariant parts of algorithm in base class.
+  - Variable steps overridden in subclasses.
+
+STRUCTURE:
+  abstract class DataProcessor {
+      // Template method — defines the algorithm skeleton
+      final void process() {
+          readData();     // fixed
+          processData();  // subclass overrides
+          writeData();    // fixed
+      }
+      abstract void processData();
+      void readData()  { System.out.println("Reading data"); }
+      void writeData() { System.out.println("Writing data"); }
+  }
+
+  class CSVProcessor extends DataProcessor {
+      void processData() { System.out.println("Processing CSV"); }
+  }
+
+REAL WORLD: java.util.AbstractList,
+            Spring JdbcTemplate,
+            HttpServlet (doGet, doPost),
+            JUnit (setUp, test, tearDown)
+
+----------------------------------------------------------------
+23. VISITOR PATTERN
+----------------------------------------------------------------
+INTENT:
+  Lets you add further operations to objects without modifying
+  them. Separates algorithm from the object structure.
+
+WHEN TO USE:
+  - Operations on complex object structures (AST, DOM).
+  - Add new operations without modifying existing classes.
+
+STRUCTURE:
+  interface Visitor { void visit(Circle c); void visit(Square s); }
+
+  class AreaCalculator implements Visitor {
+      void visit(Circle c)  { print(PI * r * r); }
+      void visit(Square s)  { print(side * side); }
+  }
+
+  interface Shape { void accept(Visitor v); }
+  class Circle implements Shape {
+      void accept(Visitor v) { v.visit(this); }
+  }
+
+REAL WORLD: javax.lang.model.element.ElementVisitor,
+            ASM bytecode visitor,
+            Compiler AST traversal
+
+----------------------------------------------------------------
+24. INTERPRETER PATTERN
+----------------------------------------------------------------
+INTENT:
+  Defines a grammar for a language and provides an interpreter
+  to deal with that grammar.
+
+WHEN TO USE:
+  - SQL parsing.
+  - Regular expressions.
+  - Simple scripting languages.
+
+REAL WORLD: java.util.regex.Pattern,
+            Spring Expression Language (SpEL),
+            SQL parsers
+
+
+================================================================
+DESIGN PATTERN COMPARISON TABLE
+================================================================
+
+  Pattern              | Category   | Key Intent
+  ---------------------|------------|---------------------------
+  Singleton            | Creational | One instance only
+  Factory Method       | Creational | Subclass decides creation
+  Abstract Factory     | Creational | Family of objects
+  Builder              | Creational | Step-by-step construction
+  Prototype            | Creational | Clone existing object
+  Adapter              | Structural | Convert interface
+  Bridge               | Structural | Decouple abstraction/impl
+  Composite            | Structural | Tree part-whole hierarchy
+  Decorator            | Structural | Add responsibility dynamically
+  Facade               | Structural | Simplify complex subsystem
+  Flyweight            | Structural | Share to save memory
+  Proxy                | Structural | Control access to object
+  Chain of Resp.       | Behavioral | Pass request along chain
+  Command              | Behavioral | Encapsulate request as obj
+  Iterator             | Behavioral | Sequential access
+  Mediator             | Behavioral | Centralize communication
+  Memento              | Behavioral | Save/restore state
+  Observer             | Behavioral | Notify on state change
+  State                | Behavioral | Change behavior on state
+  Strategy             | Behavioral | Interchangeable algorithms
+  Template Method      | Behavioral | Define algorithm skeleton
+  Visitor              | Behavioral | Add ops without modifying
+  Interpreter          | Behavioral | Grammar + Interpreter
+
+
+================================================================
+SOLID PRINCIPLES (foundation of design patterns)
+================================================================
+
+S — Single Responsibility Principle
+      A class should have only one reason to change.
+
+O — Open/Closed Principle
+      Open for extension, closed for modification.
+      (Use inheritance/interfaces to extend, not modify)
+
+L — Liskov Substitution Principle
+      Subtypes must be substitutable for their base types.
+      (Child class should not break parent class behavior)
+
+I — Interface Segregation Principle
+      Clients should not be forced to implement interfaces
+      they don't use. Prefer many small interfaces.
+
+D — Dependency Inversion Principle
+      High-level modules should not depend on low-level modules.
+      Both should depend on abstractions (interfaces).
+      (Use constructor injection / Spring @Autowired)
+
+
+================================================================
+DESIGN PATTERNS IN SPRING / JAVA
+================================================================
+
+  Pattern         | Where Used in Spring / Java
+  ----------------|------------------------------------------
+  Singleton       | Default Spring bean scope
+  Factory         | BeanFactory, ApplicationContext
+  Proxy           | @Transactional, @Cacheable, AOP
+  Template Method | JdbcTemplate, RestTemplate, JpaRepository
+  Observer        | ApplicationEvent / @EventListener
+  Decorator       | BeanPostProcessor, HttpServletWrapper
+  Strategy        | AuthenticationStrategy, Comparator
+  Builder         | ResponseEntity.ok().body(), UriComponentsBuilder
+  Facade          | JdbcTemplate (hides JDBC), SLF4J
+  Composite       | Spring Security FilterChain
+  Chain of Resp.  | Servlet Filters, Spring Security
+  Command         | Runnable, Callable, Spring Batch ItemProcessor
+  Iterator        | java.util.Iterator, for-each
+  State           | Spring StateMachine
+  Adapter         | HandlerAdapter in Spring MVC
+
+================================================================

@@ -1,0 +1,250 @@
+================================================================
+              APACHE KAFKA ARCHITECTURE
+================================================================
+
+WHAT IS APACHE KAFKA?
+--------------------------
+Apache Kafka is an open-source distributed event streaming
+platform originally developed by LinkedIn and donated to the
+Apache Software Foundation. It is designed for high-throughput,
+fault-tolerant, real-time data streaming and event processing.
+
+Kafka works as a distributed commit log — producers write
+events to Kafka topics, and consumers read them. Unlike
+traditional message queues, messages are NOT deleted after
+consumption. They are retained for a configurable period.
+
+
+CORE COMPONENTS
+--------------------------
+1. PRODUCER
+   - Publishes messages/events to Kafka topics.
+   - Can choose which partition to write to.
+   - Supports batching and compression for performance.
+
+2. CONSUMER
+   - Reads messages from one or more topics.
+   - Pull-based: consumer polls Kafka for new messages.
+   - Tracks its position using an OFFSET.
+
+3. TOPIC
+   - A named feed/category where messages are stored.
+   - Analogous to a database table or a folder.
+   - Topics are divided into partitions.
+
+4. PARTITION
+   - A topic is split into one or more partitions.
+   - Each partition is an ordered, immutable log of messages.
+   - Enables parallel processing and horizontal scalability.
+   - Messages within a partition are ordered by offset.
+
+5. OFFSET
+   - A unique sequential ID assigned to each message
+     within a partition.
+   - Consumers use offsets to track which messages
+     have been read.
+   - Consumers can replay messages by resetting the offset.
+
+6. BROKER
+   - A Kafka server that stores data and serves clients.
+   - A Kafka cluster consists of multiple brokers.
+   - Each broker holds one or more partition replicas.
+
+7. CLUSTER
+   - A group of brokers working together.
+   - Provides fault tolerance and scalability.
+
+8. ZOOKEEPER / KRAFT
+   - ZooKeeper: manages cluster metadata and leader election
+     (used in older Kafka versions).
+   - KRaft: Kafka's own consensus protocol replacing ZooKeeper
+     (used in Kafka 3.x+).
+
+9. CONSUMER GROUP
+   - A group of consumers that jointly consume a topic.
+   - Each partition is assigned to exactly ONE consumer
+     in the group.
+   - Enables load balancing across multiple consumers.
+
+10. REPLICATION
+    - Each partition is replicated across multiple brokers.
+    - One broker is the LEADER (handles reads/writes).
+    - Others are FOLLOWERS (stay in sync for failover).
+
+11. LEADER ELECTION
+    - If a leader broker fails, a follower is elected as
+      the new leader automatically.
+
+
+KAFKA MESSAGE FLOW
+--------------------------
+  Producer
+     |
+     v
+  [Topic: order-events]
+  _________________________
+  | Partition 0           |
+  | [msg1][msg2][msg3]... |  <-- offset 0, 1, 2...
+  |_______________________|
+  | Partition 1           |
+  | [msg4][msg5][msg6]... |
+  |_______________________|
+  | Partition 2           |
+  | [msg7][msg8][msg9]... |
+  |_______________________|
+     |
+     v
+  Consumer Group
+  +-----------+   +-----------+   +-----------+
+  |Consumer-1 |   |Consumer-2 |   |Consumer-3 |
+  |Partition 0|   |Partition 1|   |Partition 2|
+  +-----------+   +-----------+   +-----------+
+
+
+KAFKA VS RABBITMQ
+--------------------------
+Feature            | Kafka                  | RabbitMQ
+-------------------|------------------------|------------------
+Model              | Pull-based             | Push-based
+Msg Retention      | Retained after ACK     | Deleted after ACK
+Throughput         | Millions/sec           | Thousands/sec
+Ordering           | Guaranteed/partition   | Not guaranteed
+Replay Messages    | Yes (reset offset)     | No
+Protocol           | Kafka protocol         | AMQP, MQTT, STOMP
+Best For           | Streaming, analytics   | Task queues
+
+
+DELIVERY GUARANTEES
+--------------------------
+1. At Most Once   - Messages may be lost, never duplicated.
+                    (acks=0 on producer)
+2. At Least Once  - Messages never lost, may be duplicated.
+                    (acks=1 or acks=all, no idempotence)
+3. Exactly Once   - No loss, no duplication.
+                    (acks=all + enable.idempotence=true +
+                     transactions)
+
+
+PRODUCER ACKNOWLEDGEMENTS (acks)
+--------------------------
+acks=0  : Fire and forget. No confirmation from broker.
+          Fastest but messages may be lost.
+acks=1  : Leader broker confirms receipt.
+          Good balance of speed and safety.
+acks=all: All in-sync replicas confirm receipt.
+          Slowest but most durable.
+
+
+KEY CONCEPTS
+--------------------------
+- Log Compaction    : Kafka keeps only the latest value per key.
+- Consumer Lag      : How far behind a consumer is from the
+                      latest message in a partition.
+- Retention Policy  : Delete messages after N days or N bytes.
+- Idempotent Producer: Ensures no duplicate messages on retry.
+- Transactions      : Atomic writes across multiple partitions.
+- Kafka Streams     : Library for in-process stream processing.
+- Kafka Connect     : Connectors to import/export data from
+                      databases, S3, Elasticsearch, etc.
+- Schema Registry   : Enforces Avro/JSON schema on messages.
+
+
+STEPS TO SET UP KAFKA WITH JAVA
+--------------------------
+Step 1: Run Kafka with Docker
+  docker run -d --name kafka \
+    -p 9092:9092 \
+    -e KAFKA_CFG_NODE_ID=0 \
+    -e KAFKA_CFG_PROCESS_ROLES=controller,broker \
+    -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093 \
+    -e KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT \
+    -e KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093 \
+    -e KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER \
+    bitnami/kafka:latest
+
+Step 2: Add Kafka Java Client Dependency
+  Maven (pom.xml):
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>3.7.0</version>
+    </dependency>
+
+  Gradle:
+    implementation 'org.apache.kafka:kafka-clients:3.7.0'
+
+Step 3: Configure Producer
+  Properties props = new Properties();
+  props.put("bootstrap.servers", "localhost:9092");
+  props.put("key.serializer",
+      "org.apache.kafka.common.serialization.StringSerializer");
+  props.put("value.serializer",
+      "org.apache.kafka.common.serialization.StringSerializer");
+  props.put("acks", "all");
+  props.put("enable.idempotence", "true");
+
+Step 4: Produce a Message
+  KafkaProducer<String, String> producer =
+      new KafkaProducer<>(props);
+  ProducerRecord<String, String> record =
+      new ProducerRecord<>("my-topic", "key1", "Hello Kafka!");
+  producer.send(record);
+  producer.flush();
+  producer.close();
+
+Step 5: Configure Consumer
+  Properties props = new Properties();
+  props.put("bootstrap.servers", "localhost:9092");
+  props.put("group.id", "my-consumer-group");
+  props.put("key.deserializer",
+      "org.apache.kafka.common.serialization.StringDeserializer");
+  props.put("value.deserializer",
+      "org.apache.kafka.common.serialization.StringDeserializer");
+  props.put("auto.offset.reset", "earliest");
+  props.put("enable.auto.commit", "false");
+
+Step 6: Consume Messages
+  KafkaConsumer<String, String> consumer =
+      new KafkaConsumer<>(props);
+  consumer.subscribe(Collections.singletonList("my-topic"));
+  while (true) {
+      ConsumerRecords<String, String> records =
+          consumer.poll(Duration.ofMillis(100));
+      for (ConsumerRecord<String, String> record : records) {
+          System.out.println(record.value());
+      }
+      consumer.commitSync(); // manual commit
+  }
+
+Step 7: Create Topic Programmatically (Admin Client)
+  AdminClient admin = AdminClient.create(props);
+  NewTopic topic = new NewTopic("my-topic", 3, (short) 1);
+  admin.createTopics(Collections.singletonList(topic));
+  admin.close();
+
+
+COMMON USE CASES
+--------------------------
+- Real-time analytics and monitoring dashboards
+- Log aggregation from distributed services
+- Event sourcing in microservices architecture
+- Stream processing with Kafka Streams / Apache Flink
+- Change Data Capture (CDC) from databases
+- IoT sensor data ingestion
+- Fraud detection pipelines
+- Recommendation engine event feeds
+
+
+KAFKA ECOSYSTEM TOOLS
+--------------------------
+Tool               | Purpose
+-------------------|-----------------------------------------------
+Kafka Streams      | In-process stream processing library
+Kafka Connect      | Connectors for databases, S3, Elasticsearch
+ksqlDB             | SQL interface for Kafka streams
+Schema Registry    | Avro/JSON/Protobuf schema enforcement
+Confluent Platform | Enterprise Kafka with extra tooling
+Apache Flink       | Advanced distributed stream processing
+Kafka UI           | Open-source web UI for managing Kafka
+
+================================================================
