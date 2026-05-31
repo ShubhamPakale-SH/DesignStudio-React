@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: transaction-service
+  kafka:
+    bootstrap-servers: localhost:29092,localhost:29093,localhost:29094
+
+app:
+  topic:
+    transactions: transactions
+  schema-registry-url: http://localhost:8091
+
+logging:
+  level:
+    com.securebank: INFO
+    org.apache.kafka: WARN
