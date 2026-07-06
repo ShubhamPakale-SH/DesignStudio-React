@@ -1,0 +1,35 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: account-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/securebank
+    username: bank
+    password: bank123
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+  kafka:
+    bootstrap-servers: localhost:29092,localhost:29093,localhost:29094
+    consumer:
+      group-id: account-service-group
+
+app:
+  topic:
+    transactions: transactions
+    alerts: alerts
+    # Dead letter topics are derived per source topic: <topic>.DLT
+  schema-registry-url: http://localhost:8091
+
+logging:
+  level:
+    com.securebank: INFO
+    org.apache.kafka: WARN
+    org.hibernate.SQL: WARN

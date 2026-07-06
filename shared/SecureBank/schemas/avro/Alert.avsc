@@ -1,0 +1,27 @@
+{
+  "type": "record",
+  "namespace": "com.securebank.avro",
+  "name": "Alert",
+  "doc": "Fraud alert emitted by fraud-detection to the 'alerts' topic.",
+  "fields": [
+    { "name": "accountId",     "type": "string" },
+    { "name": "transactionId", "type": ["null", "string"], "default": null,
+      "doc": "Originating transaction id when the rule fires on a single event; null for windowed rules." },
+    { "name": "ruleType",
+      "type": {
+        "type": "enum",
+        "name": "RuleType",
+        "symbols": ["HIGH_VELOCITY", "LARGE_AMOUNT", "SPEND_SPIKE", "GEO_IMPOSSIBLE"]
+      }
+    },
+    { "name": "reason", "type": "string" },
+    { "name": "count",  "type": "long",
+      "doc": "For HIGH_VELOCITY: events in window. For other rules: 1." },
+    { "name": "detectedAt",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    }
+  ]
+}

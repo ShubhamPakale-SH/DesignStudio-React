@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:securebank;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  kafka:
+    consumer:
+      group-id: account-service-test-group
+      auto-offset-reset: earliest
+
+app:
+  topic:
+    transactions: transactions
+    alerts: alerts
+  # The KafkaAvroSerializer/Deserializer treat any URL starting with `mock://` as an in-process
+  # MockSchemaRegistryClient. All clients sharing the same scope id ("test") see the same schemas.
+  schema-registry-url: mock://test
+
+logging:
+  level:
+    com.securebank: INFO
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+    org.hibernate.SQL: WARN

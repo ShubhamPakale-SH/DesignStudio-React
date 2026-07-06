@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SecureBank — Kafka Animation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #0b0f1a; overflow: hidden; font-family: "Segoe UI", Arial, sans-serif; }
+  .viewport { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .stage { position: relative; width: 1280px; height: 720px; flex: none;
+           background: radial-gradient(ellipse at 50% 30%, #101a30 0%, #0b0f1a 70%); }
+
+  .title { position: absolute; top: 18px; left: 0; width: 100%; text-align: center; }
+  .title h1 { color: #e8edf7; font-size: 34px; letter-spacing: 0.5px; }
+  .title p  { color: #7f8db0; font-size: 16px; margin-top: 4px; }
+
+  .box { position: absolute; border-radius: 14px; padding: 14px 16px;
+         background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.14);
+         box-shadow: 0 6px 24px rgba(0,0,0,0.35); transition: box-shadow .3s, border-color .3s, background .3s; }
+  .box h2 { color: #e8edf7; font-size: 18px; font-weight: 600; }
+  .box .sub { color: #8fa0c5; font-size: 12.5px; margin-top: 4px; line-height: 1.45; }
+
+  #client { left: 70px;  top: 300px; width: 170px; height: 90px; border-color: rgba(148,163,184,.45); }
+  #txn    { left: 270px; top: 288px; width: 250px; height: 114px; border-color: rgba(147,130,255,.45); }
+  #kafka  { left: 580px; top: 265px; width: 240px; height: 160px; border-color: rgba(64,201,162,.45); }
+  #account{ left: 950px; top: 110px; width: 260px; height: 130px; border-color: rgba(147,130,255,.45); }
+  #fraud  { left: 950px; top: 440px; width: 260px; height: 158px; border-color: rgba(255,138,101,.45); }
+  #alerts { left: 950px; top: 622px; width: 260px; height: 64px;  border-color: rgba(255,193,77,.45); }
+
+  .partition { height: 20px; border-radius: 6px; margin-top: 7px; background: rgba(64,201,162,.12);
+               border: 1px solid rgba(64,201,162,.35); color: #7fd8bd; font-size: 11px;
+               display: flex; align-items: center; padding-left: 8px; transition: background .15s; }
+  .partition.flash { background: rgba(64,201,162,.55); }
+
+  .pill { display: inline-block; margin-top: 8px; padding: 3px 12px; border-radius: 999px;
+          font-size: 12px; font-weight: 700; letter-spacing: .5px;
+          background: rgba(76,217,123,.15); color: #4cd97b; border: 1px solid rgba(76,217,123,.5); }
+  .pill.frozen { background: rgba(80,170,255,.18); color: #6fc0ff; border-color: rgba(80,170,255,.6); }
+
+  .chips { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 9px; }
+  .chip { font-size: 11px; font-weight: 600; color: #b9a7a0; padding: 5px 8px; border-radius: 7px;
+          background: rgba(255,138,101,.08); border: 1px solid rgba(255,138,101,.28);
+          transition: all .25s; white-space: nowrap; }
+  .chip.fire { background: rgba(255,82,82,.28); border-color: #ff5252; color: #ffb3ab;
+               box-shadow: 0 0 14px rgba(255,82,82,.6); }
+  .chip.tick { animation: pop .35s ease-out; }
+  @keyframes pop {
+    0%   { transform: scale(1);    background: rgba(255,138,101,.08); }
+    40%  { transform: scale(1.18); background: rgba(255,193,77,.35);
+           border-color: #ffc14d; box-shadow: 0 0 16px rgba(255,193,77,.7); }
+    100% { transform: scale(1);    background: rgba(255,138,101,.08); }
+  }
+
+  .dot { position: absolute; width: 16px; height: 16px; border-radius: 50%;
+         background: #40c9a2; box-shadow: 0 0 12px #40c9a2; z-index: 5; }
+  .dot.deposit  { background: #4cd97b; box-shadow: 0 0 12px #4cd97b; }
+  .dot.withdraw { background: #ffb74d; box-shadow: 0 0 12px #ffb74d; }
+  .dot.big      { background: #ff8a65; box-shadow: 0 0 18px #ff8a65; width: 22px; height: 22px; }
+  .dot.alert    { background: #ff5252; box-shadow: 0 0 16px #ff5252; }
+  .dot.freeze   { background: #6fc0ff; box-shadow: 0 0 16px #6fc0ff; }
+  .dot .tag { position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+              color: #dbe4f5; font-size: 12px; font-weight: 600; white-space: nowrap;
+              text-shadow: 0 1px 4px #000; }
+
+  .box.danger { border-color: #ff5252 !important; box-shadow: 0 0 34px rgba(255,82,82,.55); animation: shake .45s; }
+  .box.cold   { border-color: #6fc0ff !important; box-shadow: 0 0 34px rgba(111,192,255,.45); }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+  .banner { position: absolute; left: 50%; top: 96px; transform: translateX(-50%) scale(.8);
+            background: rgba(255,82,82,.12); border: 1px solid #ff5252; color: #ff8a80;
+            font-size: 20px; font-weight: 700; padding: 10px 26px; border-radius: 10px;
+            opacity: 0; transition: opacity .3s, transform .3s; z-index: 8; white-space: nowrap; }
+  .banner.show { opacity: 1; transform: translateX(-50%) scale(1); }
+
+  .toast { position: absolute; left: 950px; top: 250px; width: 260px; text-align: center;
+           background: rgba(255,82,82,.1); line-height: 1.5;
+           border: 1px solid rgba(255,82,82,.55); color: #ff8a80; font-size: 13px; font-weight: 600;
+           padding: 8px 12px; border-radius: 9px; opacity: 0; transition: opacity .3s; z-index: 8; }
+  .toast.show { opacity: 1; }
+
+  .footer { position: absolute; bottom: 14px; left: 0; width: 100%; text-align: center;
+            color: #5c6b8f; font-size: 13.5px; letter-spacing: .3px; }
+
+  .lbl { position: absolute; color: #64748f; font-size: 12px; z-index: 2; }
+  svg.wires { position: absolute; inset: 0; z-index: 1; }
+  .wire { stroke: rgba(255,255,255,0.15); stroke-width: 1.5; fill: none; }
+
+  #recBtn { position: fixed; top: 14px; right: 14px; z-index: 99; cursor: pointer;
+            background: rgba(255,82,82,.15); color: #ff8a80; border: 1px solid rgba(255,82,82,.6);
+            font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: 999px;
+            font-family: inherit; }
+  #recBtn:hover { background: rgba(255,82,82,.3); }
+  #recBtn.hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="viewport">
+<div class="stage" id="stage">
+
+  <div class="title">
+    <h1>🏦 SecureBank</h1>
+    <p>Real-time transactions &amp; fraud detection on Apache Kafka</p>
+  </div>
+
+  <svg class="wires" width="1280" height="720">
+    <path class="wire" d="M240 345 L270 345"/>
+    <path class="wire" d="M520 345 L580 345"/>
+    <path class="wire" d="M820 330 L885 330 L885 175 L950 175"/>
+    <path class="wire" d="M820 400 L885 400 L885 519 L950 519"/>
+    <path class="wire" d="M1080 598 L1080 622"/>
+    <path class="wire" d="M1210 654 L1254 654 L1254 175 L1210 175"/>
+  </svg>
+
+  <div class="lbl" style="left:1180px; top:398px;">freeze ❄</div>
+
+  <div class="box" id="client">
+    <h2>👤 Client</h2>
+    <div class="sub">POST /api/transactions</div>
+  </div>
+
+  <div class="box" id="txn">
+    <h2>⚙️ Transaction Service</h2>
+    <div class="sub" style="font-size:14px; margin-top:7px;">Idempotent producer · acks=all<br>201 only when durable</div>
+  </div>
+
+  <div class="box" id="kafka">
+    <h2 style="font-size:16px;">Kafka · transactions</h2>
+    <div class="partition" id="p0">partition 0</div>
+    <div class="partition" id="p1">partition 1</div>
+    <div class="partition" id="p2">partition 2</div>
+    <div class="sub" style="margin-top:6px; font-size:11.5px;">keyed by accountId · 3 brokers · RF 3</div>
+  </div>
+
+  <div class="box" id="account">
+    <h2>🏦 Account Service</h2>
+    <div class="sub">ACC1002 · balance <b id="balance" style="color:#c9d6f2;">₹7,500.00</b></div>
+    <span class="pill" id="status">● ACTIVE</span>
+  </div>
+
+  <div class="box" id="fraud">
+    <h2 style="font-size:16px;">🕵️ Fraud Detection</h2>
+    <div class="sub" style="margin-top:2px;">Kafka Streams · exactly-once</div>
+    <div class="chips">
+      <div class="chip" id="rule-vel">⚡ velocity <span id="counter">0/5</span></div>
+      <div class="chip" id="rule-amt">💰 &gt; ₹1,00,000</div>
+      <div class="chip" id="rule-spike">📈 5× avg spend</div>
+      <div class="chip" id="rule-geo">🌍 geo-impossible</div>
+    </div>
+  </div>
+
+  <div class="box" id="alerts">
+    <h2 style="font-size:16px;">🚨 Topic: alerts</h2>
+  </div>
+
+  <div class="banner" id="banner"></div>
+  <div class="toast" id="toast">❌ WITHDRAW rejected — account frozen → transactions.DLT</div>
+
+  <div class="footer">Java 17 · Spring Boot · Kafka Streams · Avro · Schema Registry · PostgreSQL</div>
+</div>
+</div>
+
+<button id="recBtn">⏺ Record one loop → video</button>
+
+<script>
+const stage = document.getElementById('stage');
+const $ = id => document.getElementById(id);
+
+function fit() {
+  const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+  stage.style.transform = 'scale(' + s + ')';
+}
+window.addEventListener('resize', fit); fit();
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const PATH = {
+  clientToKafka: [[155,345],[700,345]],
+  kafkaToAccount:[[820,330],[885,330],[885,175],[1080,175]],
+  kafkaToFraud:  [[820,400],[885,400],[885,519],[1080,519]],
+  fraudToAlerts: [[1080,598],[1080,654]],
+  alertsToAccount:[[1210,654],[1254,654],[1254,175],[1210,175]]
+};
+
+function moveDot(path, duration, cls, label) {
+  return new Promise(resolve => {
+    const d = document.createElement('div');
+    d.className = 'dot ' + (cls || '');
+    if (label) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = label; d.appendChild(t); }
+    stage.appendChild(d);
+    const segs = []; let total = 0;
+    for (let i = 1; i < path.length; i++) {
+      const len = Math.hypot(path[i][0]-path[i-1][0], path[i][1]-path[i-1][1]);
+      segs.push(len); total += len;
+    }
+    const half = d.classList.contains('big') ? 11 : 8;
+    const t0 = performance.now();
+    function step(now) {
+      let p = Math.min((now - t0) / duration, 1);
+      let dist = p * total, i = 0;
+      while (i < segs.length - 1 && dist > segs[i]) { dist -= segs[i]; i++; }
+      const f = segs[i] ? dist / segs[i] : 1;
+      const x = path[i][0] + (path[i+1][0]-path[i][0]) * f;
+      const y = path[i][1] + (path[i+1][1]-path[i][1]) * f;
+      d.style.left = (x-half) + 'px'; d.style.top = (y-half) + 'px';
+      if (p < 1) requestAnimationFrame(step);
+      else { d.remove(); resolve(); }
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+function flashPartition() {
+  const p = $('p1');
+  p.classList.add('flash');
+  setTimeout(() => p.classList.remove('flash'), 250);
+}
+
+let balance = 7500;
+function setBalance(v) {
+  balance = v;
+  $('balance').textContent = '₹' + v.toLocaleString('en-IN', {minimumFractionDigits: 2});
+}
+
+async function sendTxn(opts) {
+  // opts: {kind, amount, speed, window, label}
+  await moveDot(PATH.clientToKafka, opts.speed, opts.kind, opts.label);
+  flashPartition();
+  const toAccount = moveDot(PATH.kafkaToAccount, opts.speed, opts.kind);
+  const toFraud   = moveDot(PATH.kafkaToFraud, opts.speed, opts.kind, opts.label);
+  toFraud.then(() => {
+    if (opts.window != null) {
+      $('counter').textContent = opts.window + '/5';
+      const chip = $('rule-vel');
+      chip.classList.remove('tick');
+      void chip.offsetWidth; // restart the animation even on rapid increments
+      chip.classList.add('tick');
+    }
+  });
+  await toAccount;
+  if ($('status').classList.contains('frozen') && opts.kind !== 'deposit') {
+    $('toast').classList.add('show');
+    $('account').classList.add('danger');
+    setTimeout(() => $('account').classList.remove('danger'), 500);
+  } else {
+    setBalance(opts.kind === 'deposit' ? balance + opts.amount : balance - opts.amount);
+  }
+  await toFraud;
+}
+
+async function fireRule(chipId, bannerText) {
+  $(chipId).classList.add('fire');
+  $('fraud').classList.add('danger');
+  const b = $('banner');
+  b.textContent = bannerText;
+  b.classList.add('show');
+  await sleep(400);
+  $('fraud').classList.remove('danger');
+  await moveDot(PATH.fraudToAlerts, 600, 'alert');
+  await sleep(1400);
+  b.classList.remove('show');
+  $(chipId).classList.remove('fire');
+  await sleep(300);
+}
+
+function reset() {
+  setBalance(7500);
+  $('counter').textContent = '0/5';
+  $('status').textContent = '● ACTIVE';
+  $('status').classList.remove('frozen');
+  $('account').classList.remove('cold');
+  $('fraud').classList.remove('danger');
+  $('banner').classList.remove('show');
+  $('toast').classList.remove('show');
+  ['rule-vel','rule-amt','rule-spike','rule-geo'].forEach(id => $(id).classList.remove('fire'));
+}
+
+const loopWaiters = [];
+const nextLoopStart = () => new Promise(r => loopWaiters.push(r));
+
+async function story() {
+  for (;;) {
+    reset();
+    loopWaiters.splice(0).forEach(r => r());
+    await sleep(900);
+
+    // Normal traffic
+    await sendTxn({kind:'deposit', amount:250, speed:1400, window:1});
+    await sleep(300);
+    await sendTxn({kind:'deposit', amount:500, speed:1400, window:2});
+    await sleep(500);
+
+    // Rule 1 — HIGH_VELOCITY: card-testing burst
+    for (let i = 3; i <= 6; i++) {
+      await sendTxn({kind:'withdraw', amount:50, speed:620, window:i});
+      await sleep(100);
+    }
+    await fireRule('rule-vel', '🚨 HIGH_VELOCITY — 6 txns in 60s');
+
+    // Rule 2 — LARGE_AMOUNT: single huge transaction
+    await sendTxn({kind:'deposit', amount:200000, speed:1500, window:null, label:'₹2,00,000'});
+    await fireRule('rule-amt', '🚨 LARGE_AMOUNT — ₹2,00,000 exceeds ₹1,00,000');
+
+    // Rule 3 — SPEND_SPIKE: way above this customer's average
+    await sendTxn({kind:'withdraw', amount:15000, speed:1500, window:null, label:'₹15,000'});
+    await fireRule('rule-spike', '🚨 SPEND_SPIKE — ₹15,000 is 5× the rolling average');
+
+    // Rule 4 — GEO_IMPOSSIBLE: Mumbai, then London minutes later
+    await sendTxn({kind:'withdraw', amount:500, speed:1300, window:null, label:'📍 Mumbai'});
+    await sleep(250);
+    await sendTxn({kind:'withdraw', amount:500, speed:1300, window:null, label:'📍 London'});
+    await fireRule('rule-geo', '🚨 GEO_IMPOSSIBLE — Mumbai → London in 10 minutes');
+
+    // The loop closes: freeze the account
+    await moveDot(PATH.alertsToAccount, 1600, 'freeze');
+    $('status').textContent = '❄ FROZEN';
+    $('status').classList.add('frozen');
+    $('account').classList.add('cold');
+    await sleep(900);
+
+    // Fraudster tries again — rejected
+    await sendTxn({kind:'withdraw', amount:200, speed:1200, window:null});
+    await sleep(2800);
+  }
+}
+story();
+
+// ─── Self-recording: captures exactly one loop and downloads a .webm ───
+const recBtn = document.getElementById('recBtn');
+recBtn.addEventListener('click', async () => {
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { frameRate: 30 },
+      audio: false,
+      preferCurrentTab: true,
+      selfBrowserSurface: 'include'
+    });
+  } catch (e) {
+    alert('Screen share was cancelled. Click the button and choose "This Tab" to record.');
+    return;
+  }
+
+  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9' : 'video/webm';
+  const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  recorder.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'securebank-kafka-demo.webm';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    recBtn.classList.remove('hidden');
+  };
+
+  recBtn.classList.add('hidden');          // keep the button out of the video
+  await nextLoopStart();                    // wait for a clean loop start
+  recorder.start();
+  await nextLoopStart();                    // one full loop finished
+  recorder.stop();
+});
+</script>
+</body>
+</html>
